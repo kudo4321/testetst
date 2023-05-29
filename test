@@ -1,0 +1,4892 @@
+Docs ≫
+GT-SUITE Python API
+
+
+GT-SUITE Python API
+
+Getting started
+
+Python in GT-ISE
+Python in GT-POST
+Python Environments
+External API Access
+Licensing
+
+
+API Documentation
+
+Application
+Attributes
+Case Setup
+Distributed
+Documents
+Document Tools
+Entities
+Plot and Dataset Types
+Gtt
+Links
+Objects
+Parts
+Plots
+Signals
+Simulations
+Units
+Version
+
+
+Examples
+
+1. Build Spring Mass Damper
+2. Case Setup Parameters
+3. Plots and Run Simulation
+4. External API Access
+
+
+Changelog
+
+v2020
+
+
+
+v2021
+v2022
+
+
+
+Docs ≫
+Python in GT-POST
+
+
+Python in GT-POST
+
+The GT-SUITE Python API can be used to programatically automate post-processing tasksinside GT-POST, such as querying results (.glx) files for instantaneous plots and case/timeRLTs, retrieving raw data from results, and copying/formatting plots into custom report (.gu)
+files. GT-POST contains some additional features to aid developers in utilizing the API.
+
+Built-In Python Editor
+
+Similar to GT-ISE, a Python script editor/interpreter is built directly into GT-POST. It can beaccessed from the Tools tab > Usage Utilities.
+
+../_images/script_editor_toolbar_post.jpg
+The built-in Python script editor includes features such as a multi-tab interface, syntaxhighlighting, an output panel, and the ability to run scripts directly from the editor.
+
+../_images/script_editor.jpg
+Indentation Settings
+
+
+The built-in Python editor has an auto-indent feature that automatically adds indentationafter lines that require it (ex: if statements). This feature allows either tabs or spaces to beused for indentation.
+
+When set to Tabs, the Tab Size setting changes the spacing inside the editor for displaypurposes only. This spacing does not get saved to the Python file, as the indentation isalways saved as a tab character. The auto-indent feature will will insert one tab for eachindentation level.
+
+
+When set to Spaces, the Tab Size setting determines how many spaces will be used by theauto-indent feature for each indentation level. This spacing will get saved to the Pythonfile, as the indentation is saved as multiple discrete space characters.
+
+
+
+
+These settings should be chosen before starting a new Python script. If an existing Pythonscript is opened, the editor will attempt to detect the indentation scheme that was previouslyused. If the settings are changed on an existing script (or inconsistencies are detected onopening), the editor will attempt to convert the tabs to spaces or vice versa. Note thatPython 3 does not allow mixing the use of tabs and spaces for indentation.
+
+Plot and Dataset Properties
+
+Plots and datasets have various properties that determine how they are displayed in GT-
+POST (ex: axis labels, line types, legend position). The short names, types, and possible valuesfor each property can be found in in the section API Documentation > Plot and DatasetProperties.
+
+
+Docs ≫
+Python Environments
+
+
+Python Environments
+
+The GT-SUITE installation comes with a complete, standard version of Python, which can befound in the <GTIHOME>/<VERSION>/GTsuite/python##/ folder. By default, Pythonscripts that are executed within GT-SUITE use this Python installation. However, otherPython environments can also be utilized, as described below.
+
+Warning
+
+Certain elements of GT-SUITE rely upon the included Python installation to operate.
+Because of this, it is strongly recommended that the base installation of Python (andincluded packages) not be modified. If additional modules are required, they should beinstalled to a separate Python environment using one of the methods below.
+
+Python Virtual Environments
+
+A common method of creating multiple workspaces within a Python installation is to usevirtual environments. Each virtual environment has its own copy of the original Pythonbinary, and can have its own independent set of installed Python packages. This allows usersto customize each workspace for the task at hand without risk of affecting work in otherPython environments. Since virtual environments can also be located in any directory, thiscan also be helpful in situations where the GT-SUITE installation is placed somewhere that auser does not have adequate permissions to modify.
+
+Virtual environments can be created using the native venv Python module. GT-SUITEincludes some basic tools to make creating and managing these virtual environments moreconvenient. These tools can be found inside GT-ISE or GT-POST > File > Options > Python:
+
+
+../_images/virtual_environments.jpg
+Creating A New Virtual Environment
+
+Typically, a virtual environment is created via command line using the venv command.
+Running this command copies (or, on Linux, creates symbolic links to) the necessary files inthe target directory. The virtual environment can be placed in any directory, and does notnecessarily need to be inside the GT-SUITE installation directory or a Python installationdirectory.
+
+>>> python3 -m venv /path_to_new_virtual_environment
+Inside the Options dialog, the Create New Virtual Environment tool can be used to run thiscommand automatically. Clicking this button opens a prompt where the target directory canbe specified, after which the necessary files are copied, and the directory is added to thetable in the Options dialog.
+
+Adding An Existing Python Environment
+
+If a virtual environment already exists, the Add Existing Python Environment button can beclicked to simply add the directory to the table in the Options dialog. No files are copied inthis case.
+
+This option can also be used to point to a standalone Python installation that is not a virtualenvironment. This can be useful, for example, to allow GT-SUITE to utilize a Pythoninterpreter that is part of a 3rd party IDE. In this case, the directory that contains the Pythonexecutable should be specified. Additional setup may be required; for more information,
+please see the section Getting Started > External API Access.
+
+Selecting A Python Environment For Use
+
+
+Multiple Python environments can be added to the Options dialog in GT-ISE/GT-POST. Toselect a given environment for use, the ‘Active?’ checkbox should be clicked for the desiredentry in the table. The environment selected here will be used globally for all GT-ISE and GT-
+POST GUI features that utilize Python, such as the Python Script Editor, automatic executionof Python scripts before simulations, and user shortcuts.
+
+Note
+
+This setting currently does not apply to the GT-SUITE solver. The solver always uses thebase Python environment inside the GT-SUITE installation.
+
+Installing Packages To A Virtual Environment
+
+In order to install packages to a virtual environment, it must first be activated in a commandprompt window. Activating temporarily adds the python and pip executables inside the virtualenvironment to PATH. On Windows, this can be done using the ‘activate.bat’ script foundinside the virtual environment:
+
+> my_env\Scripts\activate.bat
+(my_env) >
+As a shortcut, the Launch Console Inside Selected Environment tool can be used from theOptions dialog once the desired Python environment is selected in the table. This willautomatically launch a command prompt window and run the ‘activate.bat’ scriptcorresponding to that virtual environment.
+
+Note that this tool is not supported on Linux. However, the virtual environment can beactivated similarly via command line using the equivalent ‘activate’ script for Linux:
+
+> source my_env/bin/activate
+(my_env) >
+Notice that the command window is returned with the name of the virtual environment inparenthesis to denote the activated state. From here, standard pip commands can be used toinstall packages to the virtual environment.
+
+(my_env) > pip install <package>
+After the desired packages are installed, the deactivate command can be used, or thecommand prompt can simply be closed.
+
+
+> deactivate
+Removing A Virtual Environment
+
+The Remove Python Environment button can be used in the Options dialog to remove theselected Python environment from the table. This does not delete the directory or any filesfrom the disk. The virtual environment files may be kept for future use, or can simply bedeleted manually.
+
+External Python Installations
+
+In addition to virtual environments, GT-SUITE can point to a standalone, external Pythoninstallation, such as one that may be included as part of a 3rd party Python IDE. Suchenvironments can be added in the Options dialog using the Add Existing PythonEnvironment button, as mentioned above. In this case, the directory that contains the Pythonexecutable should be specified. Additional setup may be required; for more information,
+please see the section Getting Started > External API Access.
+
+
+Docs ≫
+External API Access
+
+
+External API Access
+
+The GT Python API can be accessed from an external installation of Python. This can behelpful for users who prefer to utilize a dedicated Python IDE, or for integration of GT-SUITEinto larger scripted workflows.
+
+Python Installation
+
+The GT Python API is based on the standard implementation of Python 3. Most variants ofPython 3.7 or newer should be compatible with the API. Please visit www.python.org formore information and downloads of the latest version.
+
+API Documentation
+
+When using the GT Python API from outside of the GT GUI applications, these APIdocumentation pages can be found in the GT installation directory under/documents/Graphical_Applications/GT-Automation_Python_API/GT-
+Automation_Python_API.html. This file can be opened in any standard web browser, andnavigated the same way as in the built-in Python editor.
+
+Py4J
+
+Py4J (Python for Java) is a library written in Python and Java designed to act as a bridgebetween the two programming languages. Since GT-SUITE applications are written in Java,
+this library is required for a Python interpreter to access Java objects inside GT-SUITE andinteract through the API. More information about Py4J can be found at www.py4j.org.
+
+The easiest method for installing the Py4J library is through pip (package manager forPython) using the command:
+
+>>> pip install py4j
+For more detailed instructions and alternative installation methods, please visit the Py4JInstallation page.
+
+Note
+
+It is not necessary to install a Java environment to access the GT Python API, as this isbuilt into the GT-SUITE installation.
+
+
+Start API Gateway (GUI)
+
+The GT Python API can be used with both an open GT-ISE/GT-POST GUI as well as with allGT GUI applications closed (headless). In both cases, an API gateway must be enabled andstarted in order to access it from an external Python interpreter.
+
+The API gateway can be started within GT-ISE and GT-POST via File > Options > Python >
+Allow external API access to GT-ISE. The default ports (port:25333 for GT-ISE andport:25444 for GT-POST) should be acceptable in most cases, but can be changed if aconflict occurs with another application.
+
+../_images/api_gateway_gui.jpg
+Once an external Python interpreter is connected to the API gateway, any commands sentthrough the API will be executed in the open instance of GT-ISE/GT-POST.
+
+Start API Gateway (Headless)
+
+The GT Python API can be used without any GT GUI applications running by using a headlessinstance of the API gateway. To manually start a headless gateway for GT-ISE, the followingcommand can be used:
+
+>>> gtisec -gateway
+GATEWAY_PORT=12345
+Similarly, to manually start a headless gateway for GT-POST, the following command can beused:
+
+>>> gtpostc -gateway
+GATEWAY_PORT=23456
+Optional Arguments:
+
+
+-port #####: Determines the port number to be used for the gateway. If omitted, anephemeral port will automatically be selected.
+
+
+-v20##: Specifies the version of GT-SUITE to be used to create the headless instance. Ifomitted, the default version specified by the VERSIONS.TXT file in the GTIHOME directorywill be used.
+
+
+-persistent: The headless instance and gateway will continue to run in the backgroundafter the command window is closed. To shut down the gateway, an app.close(force=True)
+command must be issued from within the Python API.
+
+
+
+
+Note
+
+This step is optional, as external calls to the API via the Application.get_instance()
+command will automatically generate a new headless instance of the API gateway unlessotherwise specified. However, it may be advantageous to do so if the API will be accessedmultiple times in succession, as this will reduce the overhead associated with starting anew instance of the gateway each time.
+
+External Script Initialization
+
+In order to use the GT Python API, the Application module must first be imported. This can bedone using the following lines of code:
+
+1
+2
+3
+4
+5
+6
+7import os
+import sys
+gtihome = os.environ['GTIHOME']
+sys.path.append(os.path.abspath(gtihome + '/v2022/GTsuite/ext/gtsuite.jar')) #path should 
+be adjusted for desired version
+from gtisoft.core.application import Application
+Next, the following line can be used to attach the Python interpreter to an existing instanceof the API gateway, or start a new one automatically:
+
+1app = Application.get_instance()
+Similar to starting the API gateway from command line, the get_instance() command hasoptional arguments:
+
+port=#####: If the port argument is specified, the API will first attempt to connect to anexisting instance of the gateway (GUI or headless) on that port. If no instance exists or theAPI fails to connect, a new headless instance of the gateway will be started automaticallyusing the specified port.
+
+
+
+
+
+If port=None or the port argument is omitted altogether, the API will start a new headlessinstance of the gateway using an ephemeral port.
+
+This argument is ignored when running scripts from inside the built-in editor, as the scriptis necessarily attached to the GUI instance in which it is being run in that case.
+
+
+version=’-v20##’: If a new headless instance of the gateway is started as a result of thiscall and the version is specified, the new instance will be started with that version. If noversion is specified, the default version specified by the VERSIONS.TXT file in theGTIHOME directory will be used.
+
+This argument is ignored when running scripts from the built-in editor, or if a successfulconnection was made to an existing gateway via the port parameter, as the version isalready implied/determined in these cases.
+
+
+application_type=’gtise’ or ‘gtpost’: If a new headless instance of the gateway is started as aresult of this call, this argument determines the GT application (GT-ISE or GT-POST) thatwill be used. If no application is specified, a headless instance of the GT-ISE gateway willbe started by default.
+
+This argument is ignored when running scripts from the built-in editor, or if a successfulconnection was made to an existing gateway via the port parameter, as the applicationtype is already implied/determined in these cases.
+
+
+
+
+Note
+
+A new application instance is created each time the get_instance() command is called. Inorder to access objects within the same application instance, it should be saved to avariable that can be referred to later in the script (such as ‘app’ in the above example).
+
+This is particularly important if the get_instance() call is starting a new headless APIgateway, as a new gateway will be started each time this command is called.
+
+Additionally, the following lines of code may be added for more convenient access to UNITSand UNIT_CATEGORIES.
+
+1
+2UNITS = app.gtt.units
+UNIT_CATEGORIES = app.gtt.unit_categories
+Since the units and unit_categories mappings can always be accessed directly, this step is notrequired, but can be helpful for scripts where units are accessed frequently. This initializationoccurs automatically when running Python scripts via the built-in editor but not whenutilizing the API externally, so it may also be desirable for scripts that are designed to runboth inside the built-in Python editor as well as externally.
+
+
+Docs ≫
+Licensing
+
+
+Licensing
+
+The GT Python API is part of the GT-Automation add-on license package, and requires theGTAutomation license in order to be accessed (both from inside the GT GUI applications, i.e.
+GT-ISE, as well as externally). This license is checked out during execution of Python codeand is checked back in upon completion. No license is required to open the Python ScriptEditor inside the GT GUI Applications and write Python code or view the API documentation.
+
+Please contact support@gtisoft.com for more information.
+
+
+Docs ≫
+Application
+
+
+Application
+
+The Application module represents the top level of the GT-ISE application.
+
+Module Documentation
+
+classgtisoft.core.application.Application(application_wrapper=None, gateway:
+Optional[py4j.java_gateway.JavaGateway] = None, stdout_deque: Optional[Deque] = None,
+stderr_deque: Optional[Deque] = None)
+Bases: abc.ABC
+
+The Application class represents an instance of the GT-ISE application.
+
+close(force: bool = False) → None
+Requests that the connected application shut itself down and then closes theApplication
+object’s connection.
+
+Parameters
+force (bool) . By default, GUI instances and headless instances started with the -
+persistent argument
+will ignore calls to close and remain open. If the force flag isTrue the call to
+close will not be ignored and the application will exit.
+
+staticclose_all(force: bool = False) → None
+Calls the gtisoft.core.application.Application.close() method on all connectedApplication instances.
+
+Parameters
+force (bool) . The force flag to pass when calling close.
+
+staticget_instance(port: Union[str, int, None] = None, version: Optional[str] = None,
+application_type: Union[<unknown>.ApplicationType, str] = <ApplicationType.GTISE: 'gtise'>) →
+gtisoft.core.application.Application
+Gets an instance of an Application object that is connected to a running GTapplication.
+
+Parameters
+port (int) . If the port argument is specified, the API will first attempt toconnect to an
+existing instance of a GT application that is listening on that port(either a GUI
+instance or a headless version started via command line e.g.
+gtisec
+
+
+
+
+
+-gateway -port xyz). If no instance exists or if the API fails to connect, a
+newheadless instance of the GT application will be started, listening on the givenport.
+
+If the port argument is None or not specified, the API will start a new headlessinstance of the GT application using an ephemeral port.
+
+This argument is ignored when running scripts from the editor inside of anapplication.
+
+
+version (str) . If a new headless instance of the GT application is started as aresult of this call,
+and the version is specified, the new instance will be startedwith the given version.
+The format is -v<version>, e.g. -v2020. If no version isspecified, the headless
+instance will open using the version specified by theVERSIONS.TXT file in the
+GTIHOME directory.
+
+This argument is ignored when running scripts from the editor inside of anapplication,
+or if a successful connection was made to an existing applicationlistening on the port
+specified by the port parameter.
+
+
+application_type (ApplicationType) . If a new headless instance is started as aresult of this call, the application that is
+started will be the one with the giventype (for example GT-ISE or GT-POST).
+
+
+
+
+Returns
+The Application object for the connected GT application.
+
+Return type
+Application
+
+abstract propertyapplication_typepropertydocuments
+gtisoft.core.documents.Documents:
+Read-Only; The Documents instance for opening andaccessing documents in this
+application.
+
+propertygtt
+gtisoft.core.gtt.Gtt:
+Read-Only; The Gtt instance for accessing the gtt database. Thisdatabase provides
+static information (such as templates and units) for the Application.
+
+propertystderr
+collections.deque:
+Read-Only; A deque containing the stderr output from theconnected application. May
+be None if the connected application was not started bythe script.
+
+
+propertystdout
+collections.deque:
+Read-Only; A deque containing the stdout output from theconnected application. May
+be None if the connected application was not started bythe script.
+
+propertyversion
+GTVersion
+Read-Only; The GTVersion instance that contains the version informationfor this
+application.
+
+classgtisoft.core.application.GtiseApplication(application_wrapper=None, gateway=None,
+stdout_deque: Optional[Deque] = None, stderr_deque: Optional[Deque] = None)
+Bases: gtisoft.core.application.Application
+
+propertyapplication_typepropertydistributed_queue
+gtisoft.core.distributed.DistributedQueue:
+Read-Only; The DistributedQueue instancefor submitting, fetching, and otherwise
+interacting with distributed simulations.
+
+propertysimulations
+gtisoft.core.simulations.SimulationManager:
+Read-Only; The SimulationManager instancefor starting and otherwise interacting
+with local simulations for this application.
+
+classgtisoft.core.application.GtpostApplication(application_wrapper=None,
+gateway=None, stdout_deque: Optional[Deque] = None, stderr_deque: Optional[Deque] = None)
+Bases: gtisoft.core.application.Application
+
+propertyapplication_typeclassgtisoft.core.application.ExecutionLayerApplication(application_wrapper=None,
+gateway=None, stdout_deque: Optional[Deque] = None, stderr_deque: Optional[Deque] = None)
+Bases: gtisoft.core.application.Application
+
+propertyapplication_typeclassgtisoft.core.application.ApplicationType
+Bases: gtisoft.util.collect_util.EnumMixin, enum.Enum
+
+An enumeration.
+
+get_executable_name()
+CENTRALWEBSERVER= 'centralwebserver'ELAPP= 'elapp'GEM= 'gem'GTISE= 'gtise'GTPOST= 'gtpost'IDO= 'ido'classgtisoft.core.application.GtCentralWebServerApplication(application_wrapper=None,
+gateway=None, stdout_deque: Optional[Deque] = None, stderr_deque: Optional[Deque] = None)
+Bases: gtisoft.core.application.Application
+
+propertyapplication_type
+Docs ≫
+Distributed
+
+
+Distributed
+
+The Distributed module contains methods and classes for interacting with distributed clustersto submit and fetch simulations.
+
+Module Documentation
+
+classgtisoft.core.distributed.DistributedQueue(distributed_queue_wrapper)
+Bases: object
+
+The DistributedQueue object provides methods for submitting, fetching, and otherwiseinteracting with distributed simulations.
+
+check_results(document, **kwargs)
+Checks if all packets of the distributed simulation have completed, meaning that theresults
+are ready to be downloaded.
+
+Parameters
+document (gtisoft.core.documents.Document) . The document that wassubmitted to the cluster.
+
+
+**kwargs . A set of keyword arguments specifying the options for checking thesimulation results.
+See below.
+
+
+
+
+Keyword Arguments
+url (str) . Scheduler hostname and port number for 2nd generation distributedcluster. The form
+is: url=’gdc://hostname:portnumber’. Use ‘sgdc’ instead of ‘gdc’ forencrypted
+communication. To submit to the local-distributed service, usehostname ‘localhost’.
+The default ports are 8970 (Plaintext) and 9970 (encrypted)
+for network distributed and
+8972 for local-distributed. Ports are specified in GT-
+ISE > File > Options > Run Distributed.
+
+Returns
+True if the simulation is complete and results are ready to be fetched, otherwiseFalse.
+
+Return type
+bool
+
+Raises
+exceptions.RuntimeError . If a job for the given document does not exist on thecluster or if the results could
+not be checked for any other reason.
+
+delete_results(document, **kwargs)
+Deletes the results for the given document from the queue without downloading anyresults.
+All results will be lost.
+
+Parameters
+document (gtisoft.core.documents.Document) . The document that wassubmitted to the cluster.
+
+
+**kwargs . A set of keyword arguments specifying the options for deleting thesimulation results.
+See below.
+
+
+
+
+Keyword Arguments
+url (str) . Scheduler hostname and port number for 2nd generation distributedcluster. The form
+is: url=’gdc://hostname:portnumber’. Use ‘sgdc’ instead of ‘gdc’ forencrypted
+communication. To submit to the local-distributed service, usehostname ‘localhost’.
+The default ports are 8970 (Plaintext) and 9970 (encrypted)
+for network distributed and
+8972 for local-distributed. Ports are specified in GT-
+ISE > File > Options > Run Distributed.
+
+Raises
+exceptions.RuntimeError . If the results could not be deleted for any reason.
+
+fetch_results(document, **kwargs)
+Fetches the results for the given document from the distributed cluster. This methodwill
+not return until the fetch is completed or encounters an error. If packets are stillrunning, the command will wait to attempt a fetch until they are all in a final state.
+
+Parameters
+document (gtisoft.core.documents.Document) . The document that wassubmitted to the cluster.
+
+
+**kwargs . A set of keyword arguments specifying the options for fetching thesimulation results.
+See below.
+
+
+
+
+Keyword Arguments
+url (str) . Scheduler hostname and port number for 2nd generation distributedcluster. The form
+is: url=’gdc://hostname:portnumber’. Use ‘sgdc’ instead of ‘gdc’ forencrypted
+communication. To submit to the local-distributed service, usehostname ‘localhost’.
+The default ports are 8970 (Plaintext) and 9970 (encrypted)
+for network distributed and
+8972 for local-distributed. Ports are specified in GT-
+ISE > File > Options > Run Distributed.
+
+
+Raises
+exceptions.RuntimeError . If the results could not be fetched for any reason.
+
+submit(document, **kwargs)
+Submits a document to the distributed computing cluster.
+
+Parameters
+document (gtisoft.core.documents.Document) . The document to submit forsimulation.
+
+
+**kwargs . A set of keyword arguments specifying the options for submittingthe simulation.
+See below.
+
+
+
+
+Keyword Arguments
+url (str) . Scheduler hostname and port number for 2nd generation distributedcluster. The form
+is: url=’gdc://hostname:portnumber’. Use ‘sgdc’ instead of ‘gdc’ forencrypted
+communication. To submit to the local-distributed service, usehostname ‘localhost’.
+The default ports are 8970 (Plaintext) and 9970 (encrypted)
+for network distributed and
+8972 for local-distributed. Ports are specified in GT-
+ISE > File > Options > Run Distributed.
+
+Raises
+gtisoft.core.documents.DocumentClosedError . If the document argument is aDocument instance that is not currently open.
+
+
+exceptions.RuntimeError . If the simulation could not be submitted for anyother reason.
+
+
+
+
+
+Docs ≫
+Documents
+
+
+Documents
+
+The Documents module contains functions and classes for opening, closing, and saving GT-
+ISE map documents (gtm, gtsub, gtc, etc).
+
+Module Documentation
+
+exceptiongtisoft.core.documents.OpenDocumentError(message: Optional[str] = None)
+Bases: Exception
+
+Raised when there is an error attempting to open a document.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+exceptiongtisoft.core.documents.SaveDocumentError(message: Optional[str] = None)
+Bases: Exception
+
+Raised when there is an error attempting to save a document.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+exceptiongtisoft.core.documents.DocumentClosedError(message: Optional[str] = None)
+Bases: Exception
+
+Raised when an operation is attempted on a document that is already been closed viaDocument.close().
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+classgtisoft.core.documents.Documents(document_manager_wrapper)
+Bases: collections.abc.Mapping
+
+The Documents object is used for looking up open documents in the application.
+
+Notes
+
+Documents is a Mapping that behaves similar to a Python dict. The keys to
+the mappingare document paths and the values are Document objects.
+
+Many of the dict methods are present as well as many of the same capabilities.
+
+For instance, checking for the presence of a document may be done using the Pythonmembership
+operators:
+
+print('RunMeFirst.gtm' in documents)
+print('MissingDocument.gtm' not in documents)
+Documents is “scriptable”, enabling getting documents using brackets:
+
+print(documents['RunMeFirst'])
+Documents also allows iterating using the default iterator:
+
+for name in documents: 
+print(name)
+One difference between a standard dict and a Documents object is that keys are muchmore flexible for get operations. A get operation will attempt to find a matching Documentusing (in order):
+
+1. full path
+
+
+2. a document name with extension
+
+
+3. a document name without an extension
+
+
+
+
+Only in the case that all these fail will it raise a KeyError.
+
+See also
+
+Documentation for Python dict type.
+
+
+get_active_document() → Optional[gtisoft.core.documents.Document]
+Gets the Document that is currently active in the application.
+
+If the application has a UI, this is the document that is currently being edited.
+
+If this script is being called from command line GT-ISE to create a .dat file or run asimulation as part of the “Advanced Setup -> Automation -> Run Script BeforeSimulation”
+options, the document will be the model that is currently being processed.
+
+Returns
+Document . If the application has an active document
+
+
+None . If the application does not have an active document
+
+
+
+
+get_document(document_name: str) → Optional[gtisoft.core.documents.Document]
+Gets a Document with the given name or path.
+
+Parameters
+document_name (str) . The name (with or without extension) or full path of thedocument to get.
+
+Returns
+Document . If an open document with the given name or full path was found.
+
+
+None . If no open document with the given name or full path could be found.
+
+
+
+
+get_version(file_path: str) → gtisoft.core.version.GTVersion
+Gets a document’s version without opening it.
+
+Parametersfile_path (str) . The full path of the file for the document.
+
+Returns
+GTVersion . The document’s version, if an document with the given full pathwas found.
+
+
+None . If no document full path could be found.
+
+
+
+
+items() → List[Tuple[str, gtisoft.core.documents.Document]]
+Gets a list of the (name, document) key-value pairs for all open documents.
+
+Returns
+A list of key-value pairs where the key is a document name and the value is aDocument.
+
+
+Return type
+list of (str, Document)
+
+keys() → List[str]
+Gets a new view of the keys (document names) for all open documents.
+
+Returns
+A list of the names of open documents
+
+Return type
+list of str
+
+new_document(document_type: Union[<unknown>.GtDocumentType, str, None] = None,
+license_type: Union[<unknown>.GtLicenseType, str, None] = None) →
+gtisoft.core.documents.Document
+Creates a new document.
+
+Parameters
+document_type (GtDocumentType, optional) . The type of the document tocreate. If None, GT-ISE will create a “GT-Model (.gtm)”
+document and GT-POSTwill create a “GT Report File (.gu)”.
+
+
+license_type (GtLicenseType], optional) . The license to use for the newdocument. If None, GT-ISE will use the “GT-SUITE”
+license by default. GT-POSTdoes not use this argument.
+
+
+
+
+Returns
+The newly created Document.
+
+Return type
+Document
+
+open_document(file_path: str, evolution_option: Optional[str] = None, rename_evolved: bool = True,
+evolve_dependencies: bool = True, rename_dict: Optional[Dict[str, str]] = None) →
+gtisoft.core.documents.Document
+Opens the document with the given file name.
+
+Parametersfile_path (str) . The full path of the file for the document.
+
+
+evolution_option (str, optional) . Specifies the solution method to use afterevolution. Valid values are:
+
+'new' - Minor bug fixes. Similar results to previous version.
+
+
+'rec' - Suggested settings. Significant results change possible
+
+
+
+
+
+
+
+
+'old' - Reproduce results of previous version
+
+
+
+
+
+rename_evolved (bool, optional) . If True, any model that is evolved duringopening will be renamed.
+
+
+evolve_dependencies (bool, optional) . If True, subassembly models referredto by the model being opened will also be
+evolved. Note that this does NOTaffect compound (.gtc) files referenced by
+SubassemblyExternal, these must beevolved in order for the parent model to be opened.
+
+
+rename_dict (dict, optional) . A dictionary that maps original model names tothe name to use for the evolved version
+of that file. If rename_evolved is False,
+this parameter is not used. If a file is
+to be renamed and it does not have anentry in this dict, the default behavior is to
+append ‘_v<version>’.
+
+
+
+
+Usage in GT-POST
+
+Starting in v2021, GT-SUITE output files will now have the new extension .glx insteadof
+the old extension of .gdx. This change was required due to adopting a new databasestorage
+technology which offers many performance benefits.
+
+Legacy .gdx files can still be accesed via the GT-POST Python API in v2021 using theopen_document()
+method. However, they will be silently converted to the new .glx fileformat prior to being opened.
+Note that if a .glx version of the .gdx file already existsin the local directory, it will be overwritten
+by this operation.
+
+All evolution parameters should be omitted when opening output (.glx) files, regardlessof version.
+
+Notes
+
+If the model is from a previous version, the evolution_option parameter must bespecified,
+otherwise an OpenDocumentError will be raised. If the model is not from aprevious
+version, all of the evolution parameters will be ignored.
+
+Returns
+A Document object for the document that was opened if a document with thegiven path
+was found, otherwise raises an OpenDocumentError.
+
+Return type
+Document
+
+Raises
+OpenDocumentError . If the file with the given path does not exist, the documentat the given path is an
+unsupported type, or if any other error occurs whileopening.
+
+values() → List[gtisoft.core.documents.Document]
+Gets a list of Document objects for all open documents.
+
+Returns
+A list of all open documents.
+
+Return type
+list of Document
+
+classgtisoft.core.documents.Document(document_wrapper)
+Bases: object
+
+A Document object represents and provides methods for interacting with an opendocument in a
+GT application.
+
+close() → None
+Closes this document in the application.
+
+Returns
+No return value.
+
+Return type
+None
+
+save() → None
+Saves this document to its existing file.
+
+Returns
+No return value.
+
+Return type
+None
+
+Raises
+SaveDocumentError . If there is a problem saving the document.
+
+
+DocumentClosedError . If close() was previously called for the document.
+
+
+
+
+save_as(file_path: str) → None
+Saves this document to a new file.
+
+Parametersfile_path (str) . The full path of the target file.
+
+Returns
+No return value.
+
+Return type
+None
+
+Raises
+SaveDocumentError . If there is a problem saving the document.
+
+
+DocumentClosedError . If close() was previously called for the document.
+
+
+
+
+propertyis_closed
+bool:
+Read-Only; True if close has been called on this document.
+
+propertyname
+str:
+Read-Only; The name of this document is the file path if it has been saved todisk,
+or else the file name if it has not been saved.
+
+propertyversion
+GTVersion
+Read-Only; The GTVersion instance that contains the version informationfor this
+document.
+
+classgtisoft.core.documents.GtiseDocument(document_wrapper)
+Bases: gtisoft.core.documents.Document
+
+close() → None
+Closes this document in the application.
+
+Returns
+No return value.
+
+Return type
+None
+
+propertyadvanced_setup
+gtisoft.core.objects.Object:
+*Read-Only; an Object instance for accessing propertiesof the Advanced Setup
+dialog. May return None if Advanced Setup is not available forthis document.
+
+propertycase_setup
+gtisoft.core.case_setup.CaseSetup:
+*Read-Only; a CaseSetup instance for accessing theand modifying run cases,
+parameter folders, and parameters in this document’s CaseSetup dialog.
+
+
+propertydesign_optimizer
+gtisoft.core.objects.Object:
+*Read-Only; an Object instance for accessing propertiesof the Design Optimizer
+dialog. May return None if the Design Optimizer is notavailable for this document.
+
+propertylicense_type
+Gets or sets the license type for this document.
+
+GtLicenseType:
+The license this document is associated with.
+
+Raises
+exceptions.ValueError . If license type is incompatible or invalid in documentwhen accessing.
+
+propertylinks
+gtisoft.core.links.Links:
+Read-Only; The Links instance that contains the collection ofphysics links for
+this document.
+
+propertyobjects
+gtisoft.core.objects.Objects:
+Read-Only; The Objects instance that contains thecollection of GT-Objects for
+this document.
+
+propertyoutput_setup
+gtisoft.core.objects.Object:
+*Read-Only; an Object instance for accessing propertiesof the Output Setup
+dialog. May return None if Output Setup is not available for thisdocument.
+
+propertyparts
+gtisoft.core.parts.Parts:
+Read-Only; The Parts instance that contains the collection ofparts for this
+document.
+
+propertyrun_setup
+gtisoft.core.objects.Object:
+*Read-Only; an Object instance for accessing propertiesof the Run Setup dialog.
+May return None if the Run Setup is not available for thisdocument.
+
+propertysignals
+gtisoft.core.signals.Signals:
+Read-Only; The Signals instance that contains thecollection of controls links for
+this document.
+
+
+classgtisoft.core.documents.GtpostDocument(document_wrapper)
+Bases: gtisoft.core.documents.Document
+
+get_case_rlts() → EntityList
+Gets the case RLTs for this document.
+
+Returns
+An EntityList instance containing the TemplateName groups that are the rootentities
+of the case RLTs tree.
+
+Return type
+EntityList
+
+get_end_of_run_plots() → EntityList
+Gets the end of run plots for this document.
+
+Returns
+An EntityList object containing the TemplateName:PartName groups that are theroot
+entities of the end of run plots tree.
+
+Return type
+EntityList
+
+get_plots(case_number: int) → EntityList
+Gets the instantaneous plots for the given case number from this document.
+
+Parameters
+case_number (int) . The case number for which to get the instantaneous plots.
+
+Returns
+An EntityList object containing the TemplateName:PartName groups that are theroot
+entities of the instantaneous plots tree.
+
+Return type
+EntityList
+
+get_time_rlts(case_number: int) → EntityList
+Gets the time RLTs for the given case number from this document.
+
+Parameters
+case_number (int) . The case number for which to get the time RLTs.
+
+Returns
+An EntityList object containing the TemplateName groups that are the root entitiesof
+the time RLTs tree.
+
+Return type
+EntityList
+
+propertycases
+EntityList:
+*Read-Only; an EntityList instance containing an Entity object for eachcase.
+
+classgtisoft.core.documents.GuDocument(document_wrapper)
+Bases: gtisoft.core.documents.Document
+
+propertyplots
+EntityList:
+*Read-Only; an EntityList instance containing group Entity objects that arethe
+root of the GU file Plots tree.
+
+classgtisoft.core.documents.GemDocument(document_wrapper)
+Bases: gtisoft.core.documents.Document
+
+close() → None
+Closes this document in the application.
+
+Returns
+No return value.
+
+Return type
+None
+
+propertycase_setup
+gtisoft.core.case_setup.CaseSetup:
+*Read-Only; a CaseSetup instance for accessing theand modifying run cases,
+parameter folders, and parameters in this document’s CaseSetup dialog.
+
+propertyobjects
+gtisoft.core.objects.Objects:
+Read-Only; The Objects instance that contains thecollection of GT-Objects for
+this document.
+
+classgtisoft.core.documents.GtLicenseType
+Bases: gtisoft.util.collect_util.EnumMixin, enum.Enum
+
+An enumeration.
+
+
+GT_AUTOLION= 'GT-AutoLion'GT_DRIVE= 'GT-DRIVE+'
+GT_POWER= 'GT-POWER'GT_POWER_LAB= 'GT-POWERLab'GT_POWER_XRT= 'GT-POWER-xRT'GT_PROCESS= 'GT-ProcessMap'GT_SUITE= 'GT-SUITE'GT_SUITE_MP= 'GT-SUITEmp'GT_SUITE_RT= 'GT-SUITE-RT'GT_XLINK= 'GT-xLINK'classgtisoft.core.documents.GtDocumentType
+Bases: gtisoft.util.collect_util.EnumMixin, enum.Enum
+
+An enumeration.
+
+GT_AUTO_LION= 'autolion'GT_COMPOUND= 'gtc'GT_DRIVE_PLUS= 'gtdrive'GT_EXTERNAL_ASSEMBLY= 'gtsub'GT_GEM= 'gem'GT_GEM_COOL= 'ghx'GT_MODEL= 'gtm'GT_OBJECT_LIBRARY= 'gto'
+GT_PROCESS= 'gtprocess'GT_REPORT_FILE= 'gu'GT_XLINK= 'xlink'
+Docs ≫
+Document Tools
+
+
+Document Tools
+
+The Document Tools module contains functions and utilities that can be performed at thedocument level.
+
+Note that when accessing the GT-SUITE Python API externally, the document_tools modulemust be imported prior to using the functions below. To import all functions, the followingimport statement can be used:
+
+1from gtisoft.tools.document_tools import *
+Module Documentation
+
+gtisoft.tools.document_tools.run_xrt_advisor(document:
+gtisoft.core.documents.GtiseDocument) → None
+Runs the GT-POWER-xRT Advisor with default arguments. If values are already at theirdefault recommended value, no action is taken.
+
+Returns
+No return value.
+
+Return type
+None
+
+gtisoft.tools.document_tools.get_unused_objects(document:
+gtisoft.core.documents.GtiseDocument) → Optional[List[gtisoft.core.objects.Object]]
+Gets unused objects in a model.
+
+Returns
+A list of the unused objects
+
+Return type
+list of Object
+
+gtisoft.tools.document_tools.delete_unused_objects(document:
+gtisoft.core.documents.GtiseDocument, force: bool = False) → None
+Deletes unused objects in a model.
+
+
+Parameters
+force (bool, optional) . If True, forces deletion of objects that may optionally be usedwithout dependency. False by default.
+
+Returns
+No return value.
+
+Return type
+None
+
+gtisoft.tools.document_tools.delete_unused_templates(document:
+gtisoft.core.documents.GtiseDocument) → None
+Deletes unused templates in a model. Should be called after unused_objects when wantingto delete both unused objects and templates.
+
+Returns
+No return value.
+
+Return type
+None
+
+gtisoft.tools.document_tools.combine_flow_volume_to_pipe(document:
+gtisoft.core.documents.GtiseDocument, parts: List[gtisoft.core.parts.Part]) → None
+Combines the passed in parts to a pipe. All parts must be in the same assembly.
+
+Parameters
+parts (list of Part) . A list of parts to combine into a pipe. Note: the order of theparts in the list may
+influence certain properties inside the resulting pipe.
+
+gtisoft.tools.document_tools.combine_flow_volume_to_flowsplit(document:
+gtisoft.core.documents.GtiseDocument, parts: List[gtisoft.core.parts.Part]) → None
+Combines the passed in parts to a flowsplit. All parts must be in the same assembly.
+
+Parameters
+parts (list of Part) . A list of parts to combine into a flowsplit. Note: the order ofthe parts in the list
+may influence certain properties inside the resulting flowsplit.
+
+gtisoft.tools.document_tools.gt_realdrive_calculate_route(object:
+gtisoft.core.objects.Object) → None
+Generates a GT-RealDrive profile from a ProfileGpsRoute object with pre-filled routeinput
+attributes and stores it in the object.
+
+Note: This method will replace the profile data if it is already present.
+
+
+Parameters
+object (Object) . The ProfileGpsRoute object to generate the GT-RealDrive profile for.
+
+
+Docs ≫
+Entities
+
+
+Entities
+
+The Entities module contains functions and classes for manipulating elements of a GT-POSTdocument (GU and GLX).
+
+Module Documentation
+
+classgtisoft.core.entities.Entity(wrapper)
+Bases: gtisoft.core.entities.EntitySelectorMixin,
+gtisoft.core.entities.EntityTreeWalkerMixin, gtisoft.core.entities.EntityCreatorMixin
+
+The Entity class is the base class for all entities in the GT-POST API. An ‘Entity’ objectrepresents a database item in a GLX or GU. Most of the elements visible in the GT-POSTtree have
+a corresponding Entity: Cases, Groups, Plots, etc.
+
+This class is not explicitly returned by API methods but forms the base functionality for allentities.
+
+propertychildren
+Gets the children (direct descendants) of this Entity.
+
+Returns
+An EntityList object with this Entity’s children (may be empty if the entity has nochildren)
+
+Return type
+EntityList
+
+propertyentity_namestr:
+Gets or sets the name of this Entity.
+
+Raises
+ValueError . When setting the name, if the new name is invalid.
+
+propertyentity_type
+EntityType:
+Read-Only; The type of item this Entity represents.
+
+
+propertyparent
+Entity:
+Read-Only; this Entity object’s parent Entity if it has one, or else None.
+
+classgtisoft.core.entities.EntityType
+Bases: enum.Enum
+
+This enum contains members representing the valid types of entities in a GLX or GU.
+
+CASE= 2DATA= 5GROUP= 3PLOT= 4classgtisoft.core.entities.DefaultEntity(wrapper)
+Bases: gtisoft.core.entities.Entity
+
+DefaultEntity is the base class for entities that have properties.
+
+This class is not explicitly returned by API methods but forms the base functionality for allentities that contain properties.
+
+propertyproperties
+GT-POST plot and dataset properties are accessed using the same data structures aspart and
+object attribute values in GT-ISE. The properties field is an instance ofAttributes
+that provides access to the properties for this entity.
+
+gtisoft.core.attributes.Attributes:
+Read-Only; The Attributes instance that contains the collection of attribute values(properties) for this Entity.
+
+classgtisoft.core.entities.GroupEntity(wrapper)
+Bases: gtisoft.core.entities.DefaultEntity
+
+A GroupEntity object represents a generic tree entity in GT-POST, such as aTemplate:PartName node in an instantaneous plot tree or a user-created GU group.
+
+classgtisoft.core.entities.CaseEntity(wrapper)
+Bases: gtisoft.core.entities.DefaultEntity
+
+CaseEntity objects represent a run case in GT-POST.
+
+
+propertycase_label
+str:
+Read-Only; The label for this case as seen in case setup.
+
+propertycase_number
+int:
+Read-Only; The number for this case as seen in case setup.
+
+Note: This is not necessarily equal to case_index if not all cases are active.
+
+propertyis_failed
+bool:
+Read-Only; True if the simulation failed for this case, otherwise False.
+
+propertyis_skipped
+bool:
+Read-Only; True if this case was skipped, otherwise False.
+
+classgtisoft.core.entities.PlotEntity(wrapper)
+Bases: gtisoft.core.entities.DefaultEntity
+
+PlotEntity objects represent a plot in GT-POST.
+
+set_contour_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]])
+Sets the unit for this plot’s contour axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share the samename.
+
+Raises
+exceptions.ValueError . If the given unit is not valid for the contour axis
+
+set_x_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]])
+Sets the unit for this plot’s X axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share the samename.
+
+Raises
+exceptions.ValueError . If the given unit is not valid for the X axis
+
+
+set_y2_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]])
+Sets the unit for this plot’s Y2 axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share the samename.
+
+Raises
+exceptions.ValueError . If the given unit is not valid for the Y2 axis
+
+set_y3_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]])
+Sets the unit for this plot’s Y3 axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share the samename.
+
+Raises
+exceptions.ValueError . If the given unit is not valid for the Y3 axis
+
+set_y4_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]])
+Sets the unit for this plot’s Y4 axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share the samename.
+
+Raises
+exceptions.ValueError . If the given unit is not valid for the Y4 axis
+
+set_y_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]])
+Sets the unit for this plot’s Y axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share the samename.
+
+Raises
+exceptions.ValueError . If the given unit is not valid for the Y axis
+
+set_z_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]])
+Sets the unit for this plot’s Z axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share the samename.
+
+Raises
+exceptions.ValueError . If the given unit is not valid for the Z axis
+
+propertycontour_unit
+Unit:
+Read-Only; The unit to use for this plot’s contour axis. Returns None if this plot
+
+does not have a contour axis.
+
+propertyx_unit
+Unit:
+Read-Only; The unit to use for this plot’s X axis. Returns None if this plot does
+
+not have an X axis.
+
+propertyy2_unit
+Unit:
+Read-Only; The unit to use for this plot’s Y2 axis. Returns None if this plot does
+
+not have a Y2 axis.
+
+propertyy3_unit
+Unit:
+Read-Only; The unit to use for this plot’s Y3 axis. Returns None if this plot does
+
+not have a Y3 axis.
+
+propertyy4_unit
+Unit:
+Read-Only; The unit to use for this plot’s Y4 axis. Returns None if this plot does
+
+not have a Y4 axis.
+
+
+propertyy_unit
+Unit:
+Read-Only; The unit to use for this plot’s Y axis. Returns None if this plot does
+
+not have a Y axis.
+
+propertyz_unit
+Unit:
+Read-Only; The unit to use for this plot’s Z axis. Returns None if this plot does
+
+not have a Z axis.
+
+classgtisoft.core.entities.DatasetEntity(wrapper)
+Bases: gtisoft.core.entities.DefaultEntity
+
+DatasetEntity objects represent a plot’s dataset in GT-POST.
+
+set_contour_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]], category:
+gtisoft.core.units.UnitCategory = None)
+Sets the unit for this dataset’s contour axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share thesame name.
+
+
+category (UnitCategory, optional) . The category for the unit to set. This isrequired to disambiguate the unit parameter
+in the case it is a list.
+
+
+
+
+Raises
+exceptions.ValueError . If the dataset does not have a contour unit, or if the givenunit list cannot be
+resolved.
+
+set_x_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]], category:
+gtisoft.core.units.UnitCategory = None)
+Sets the unit for this dataset’s X axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share thesame name.
+
+
+category (UnitCategory, optional) . The category for the unit to set. This isrequired to disambiguate the unit parameter
+in the case it is a list.
+
+
+
+
+Raises
+exceptions.ValueError . If the dataset does not have an X unit, or if the given unitlist cannot be resolved.
+
+set_y_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]], category:
+gtisoft.core.units.UnitCategory = None)
+Sets the unit for this dataset’s Y axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share thesame name.
+
+
+category (UnitCategory, optional) . The category for the unit to set. This isrequired to disambiguate the unit parameter
+in the case it is a list.
+
+
+
+
+Raises
+exceptions.ValueError . If the dataset does not have a Y unit, or if the given unitlist cannot be resolved.
+
+set_z_unit(unit: Union[gtisoft.core.units.Unit, List[gtisoft.core.units.Unit]], category:
+gtisoft.core.units.UnitCategory = None)
+Sets the unit for this dataset’s Z axis.
+
+Parameters
+unit (Unit or list of Unit) . The new unit to use; may be a single instance ofUnit or a list. The list
+facilitates ease of use with a gtisoft.core.units.Unitsdictionary, which may
+return more than one Unit if multiple units share thesame name.
+
+
+category (UnitCategory, optional) . The category for the unit to set. This isrequired to disambiguate the unit parameter
+in the case it is a list.
+
+
+
+
+Raises
+exceptions.ValueError . If the dataset does not have a Z unit, or if the given unitlist cannot be resolved.
+
+propertycontour_unit
+Unit:
+Read-Only; The contour unit for this dataset. Returns None if this dataset doesnot have a contour unit.
+
+propertydataData:
+Gets or sets the raw data for this dataset.
+
+Parameters
+data_map (Data or dict) . Setting the data property for this dataset will accepteither another Data object to
+copy, or a dictionary that maps the data axis name(e.g. ‘X’, ‘Y’, etc) to a list of
+float, int, or str values.
+
+Examples:
+
+>>> dataset_A = plot_from_glx.dataset
+>>> dataset_B = plot_from_gu.create_dataset('xy', 'Example Dataset; copy from GLX 
+plot')
+>>> dataset_B.data = dataset_A.data
+>>> dataset = plot.create_dataset('xy', 'Example Dataset; create from list')
+>>> dataset.data = {'x':[1,2,3], 'y':[4,5,6]}
+propertyx_unit
+Unit:
+Read-Only; The X unit for this dataset. Returns None if this dataset does nothave
+an X unit.
+
+propertyy_unit
+Unit:
+Read-Only; The Y unit for this dataset. Returns None if this dataset does nothave
+a Y unit.
+
+propertyz_unit
+Unit:
+Read-Only; The Z unit for this dataset. Returns None if this dataset does nothave
+a Z unit.
+
+classgtisoft.core.entities.Data(wrapper)
+Bases: object
+
+A Data object contains the raw data for a DatasetEntity. This is the data as it exists in
+thesource file or database.
+
+propertyavailable_data
+list of str:
+Read-Only; A list of the names of the available data in this Data object.
+
+propertydata_type
+str:
+Read-Only; The type of data represented by this Data object.
+
+propertyformatted
+str:
+Read-Only; A formatted string representation of this Data object. Containsmetadata on available properties and their values as well as the data itself. Data is
+tab-
+delimited for easy pasting into other applications.
+
+classgtisoft.core.entities.EntityList(wrapper)
+Bases: collections.abc.MutableSequence, gtisoft.core.entities.EntitySelectorMixin,
+gtisoft.core.entities.EntityTreeWalkerMixin, gtisoft.core.entities.EntityCreatorMixin
+
+This class is a collection of zero or more Entity objects.
+
+Notes
+
+EntityList is a Sequence that behaves similarly to a Python list.
+
+Much of the behavior that is present in list is also present in EntityList. For instancechecking the number of values:
+
+>>> entities = parent_entity.children
+>>> print(len(entities))
+3
+EntityList is also “scriptable”, enabling getting a value at a specific index using
+brackets:
+
+>>> print(entities[0])
+Entity(entity_type=<EntityType.GROUP: 3>, entity_name='AcoustExtMicrophone:Exh-Mic')
+>>> print(entities[-1])
+Entity(entity_type=<EntityType.GROUP: 3>, entity_name='ValveCamConn:InVal1B')
+and it supports “slicing”:
+
+>>> print(entities[0:2])
+[Entity(entity_type=<EntityType.GROUP: 3>, entity_name='AcoustExtMicrophone:Exh-Mic'), 
+Entity(entity_type=<EntityType.GROUP: 3>, entity_name='AcoustExtMicrophone:Int-Mic')]
+insert(index: int, value: gtisoft.core.entities.Entity)
+S.insert(index, value) . insert value before index
+
+classgtisoft.core.entities.EntitySelectorMixin
+Bases: object
+
+This mixin defines methods for navigating an entity tree (e.g. ‘Instantaneous Plots’) byselecting nodes based on type and optional name filters.
+
+The general tree hierarchy of entities in GT-POST is: Group -> Plot -> Dataset. Some treesmay repeat certain levels, and the levels may be selectable by sub-type.
+
+
+Some Group entities may have an implicit sub-type based on what tree type they are apart of.
+A call to get_all_groups may return any of these, but there are specific methods tofilter by
+the sub-type:
+
+Template - Groups that represent a template grouping (e.g. ‘PipeRound’)
+
+
+Part - Groups that represent a specific part and its plots (e.g. ‘EngCylinder-01’)
+
+
+Folder - Groups that separate RLTs by some scheme (e.g. ‘Pressure’ or ‘Thermal’)
+
+
+
+
+The specific hierarchies of the different tree types are:
+
+Instantaneous Plots: Group (a Template:Part pair) -> Plot -> Dataset
+
+
+Case RLTs: Group (Template) -> Group (Part) -> Group (RLT Folder) -> Plot -> Dataset
+
+
+Time RLTs: Group (Template) -> Group (Part) -> Group (RLT Folder) -> Plot -> Dataset
+
+
+GU Plots: Group -> Plot -> Dataset
+
+
+
+
+get_all_datasets(dataset_name: str = None) → gtisoft.core.entities.EntityList
+Recursively searches all children and returns the set of child Entity objects that havetype EntityType.DATA and match the given name.
+
+This method supports wildcards as part of the data_name argument, for instance:
+
+>>> datasets = gt_post_doc.get_plots(case_number=1).get_all_datasets('RPM =*')
+Parameters
+dataset_name (str, optional) . If present, the child groups will be filtered to thosethat have the given name, or
+match a given name with wildcards. If None, thismethod will return all child data
+entities.
+
+Returns
+A new EntityList collection containing all matching entities. If no entities match,
+theEntityList will be empty.
+
+Return type
+EntityList
+
+get_all_folders(folder_name: str = None) → gtisoft.core.entities.EntityList
+Recursively searches all children and returns the set of child Entity objects that havetype EntityType.GROUP, represent an RLT folder in an RLT tree, and match the givenname.
+
+This method supports wildcards as part of the folder_name argument, for instance:
+
+>>> folders = gt_post_doc.case_rlts.get_all_folders('Timing*')
+
+Parameters
+folder_name (str, optional) . If present, the child groups will be filtered to thosethat have the given name, or
+match a given name with wildcards. If None, thismethod will return all child group
+entities that represent an RLT folder.
+
+Returns
+A new EntityList collection containing all matching entities. If no entities match,
+theEntityList will be empty.
+
+Return type
+EntityList
+
+get_all_groups(group_name: str = None) → gtisoft.core.entities.EntityList
+Recursively searches all children and returns the set of child Entity objects that havetype EntityType.GROUP and match the given name.
+
+This method supports wildcards as part of the group_name argument, for instance:
+
+>>> groups = gt_post_doc.get_plots(case_number=1).get_all_groups('PipeRound:*')
+Parameters
+group_name (str, optional) . If present, the child groups will be filtered to thosethat have the given name, or
+match a given name with wildcards. If None, thismethod will return all child group
+entities.
+
+Returns
+A new EntityList collection containing all matching entities. If no entities match,
+theEntityList will be empty.
+
+Return type
+EntityList
+
+get_all_parts(part_name: str = None) → gtisoft.core.entities.EntityList
+Recursively searches all children and returns the set of child Entity objects that havetype EntityType.GROUP, represent a Part in an RLT or Plot tree, and match the givenname.
+
+This method supports wildcards as part of the part_name argument, for instance:
+
+>>> parts = gt_post_doc.get_plots(case_number=1).get_all_parts('PipeRound-*')
+Parameters
+part_name (str, optional) . If present, the child groups will be filtered to thosethat have the given name, or
+match a given name with wildcards. If None, thismethod will return all child group
+entities that represent a part.
+
+Returns
+A new EntityList collection containing all matching entities. If no entities match,
+theEntityList will be empty.
+
+Return type
+EntityList
+
+get_all_plots(plot_name: str = None) → gtisoft.core.entities.EntityList
+Recursively searches all children and returns the set of child Entity objects that havetype EntityType.PLOT and match the given name.
+
+This method supports wildcards as part of the plot_name argument, for instance:
+
+>>> plots = gt_post_doc.get_plots(case_number=1).get_all_plots('Valve*')
+Parameters
+plot_name (str, optional) . If present, the child groups will be filtered to thosethat have the given name, or
+match a given name with wildcards. If None, thismethod will return all child plot
+entities.
+
+Returns
+A new EntityList collection containing all matching entities. If no entities match,
+theEntityList will be empty.
+
+Return type
+EntityList
+
+get_all_templates(template_name: str = None) → gtisoft.core.entities.EntityList
+Recursively searches all children and returns the set of child Entity objects that havetype EntityType.GROUP, represent a Template in an RLT or Plot tree, and match thegiven
+name.
+
+This method supports wildcards as part of the template_name argument, for instance:
+
+>>> templates = gt_post_doc.get_plots(case_number=1).get_all_templates('Pipe*')
+Parameters
+template_name (str, optional) . If present, the child groups will be filtered tothose that have the given name, or
+match a given name with wildcards. If None,
+this method will return all child group
+entities that represent a template.
+
+Returns
+A new EntityList collection containing all matching entities. If no entities match,
+theEntityList will be empty.
+
+Return type
+EntityList
+
+get_dataset(dataset_name: str = None) → Optional[gtisoft.core.entities.Entity]
+Recursively searches all children and returns the first child Entity object that has typeEntityType.DATA and matches the given name.
+
+This method supports wildcards as part of the dataset_name argument, for instance:
+
+>>> dataset = gt_post_doc.get_plots(case_number=1).get_dataset('RPM =*')
+Parameters
+dataset_name (str, optional) . If present, the child dataset will be the first ofthose that have the given name, or
+matches a given name with wildcards. If None,
+this method will return the first child
+dataset.
+
+Returns
+None . If there are no child dataset or no dataset that match the criteria.
+
+
+Entity . The first child entity that matches the criteria.
+
+
+
+
+get_folder(folder_name: str = None) → Optional[gtisoft.core.entities.Entity]
+Recursively searches all children and returns the first child Entity object that has typeEntityType.GROUP, represents an RLT folder in an RLT tree, and matches the givenname.
+
+This method supports wildcards as part of the folder_name argument, for instance:
+
+>>> folder = gt_post_doc.case_rlts.get_folder('Timing*')
+Parameters
+folder_name (str, optional) . If present, the child folder will be the first of thosethat have the given name, or
+matches a given name with wildcards. If None, thismethod will return the first child
+folder.
+
+Returns
+None . If there are no child folders or no folders that match the criteria.
+
+
+Entity . The first child entity that matches the criteria.
+
+
+
+
+get_group(group_name: str = None) → Optional[gtisoft.core.entities.Entity]
+Recursively searches all children and returns the first child Entity object that has typeEntityType.GROUP and matches the given name.
+
+This method supports wildcards as part of the group_name argument, for instance:
+
+>>> group = gt_post_doc.get_plots(case_number=1).get_group('PipeRound:*')
+Parameters
+group_name (str, optional) . If present, the child group will be the first of thosethat have the given name, or
+matches a given name with wildcards. If None, thismethod will return the first child
+group.
+
+Returns
+None . If there are no child groups or no groups that match the criteria.
+
+
+Entity . The first child entity that matches the criteria.
+
+
+
+
+get_part(part_name: str = None) → Optional[gtisoft.core.entities.Entity]
+Recursively searches all children and returns the first child Entity object that has typeEntityType.GROUP, represents a Part in an RLT or Plot tree, and matches the givenname.
+
+This method supports wildcards as part of the part_name argument, for instance:
+
+>>> part = gt_post_doc.get_plots(case_number=1).get_parts('PipeRound-*')
+Parameters
+part_name (str, optional) . If present, the child part will be the first of those thathave the given name, or
+matches a given name with wildcards. If None, this methodwill return the first child
+part.
+
+Returns
+None . If there are no child parts or no parts that match the criteria.
+
+
+Entity . The first child entity that matches the criteria.
+
+
+
+
+get_plot(plot_name: str = None) → Optional[gtisoft.core.entities.Entity]
+Recursively searches all children and returns the first child Entity object that has typeEntityType.PLOT and matches the given name.
+
+
+This method supports wildcards as part of the plot_name argument, for instance:
+
+>>> plot = gt_post_doc.get_plots(case_number=1).get_plot('Valve*')
+Parameters
+plot_name (str, optional) . If present, the child plot will be the first of those thathave the given name, or
+matches a given name with wildcards. If None, this methodwill return the first child
+plot.
+
+Returns
+None . If there are no child plots or no plots that match the criteria.
+
+
+Entity . The first child entity that matches the criteria.
+
+
+
+
+get_template(template_name: str = None) → Optional[gtisoft.core.entities.Entity]
+Recursively searches all children and returns the first child Entity object that has typeEntityType.GROUP, represents a Template in an RLT or Plot tree, and matches the givenname.
+
+This method supports wildcards as part of the template_name argument, for instance:
+
+>>> template = gt_post_doc.get_plots(case_number=1).get_template('Pipe*')
+Parameters
+template_name (str, optional) . If present, the child template will be the first ofthose that have the given name, or
+matches a given name with wildcards. If None,
+this method will return the first child
+template.
+
+Returns
+None . If there are no child templates or no templates that match the criteria.
+
+
+Entity . The first child entity that matches the criteria.
+
+
+
+
+classgtisoft.core.entities.EntityTreeWalkerMixin
+Bases: object
+
+This mixin provides a method of walking an entity tree (e.g. ‘Instantaneous Plots’) andapplying
+a function to each Entity it contains.
+
+get_tree_string(predicate: Callable[[Entity], bool] = <function EntityTreeWalkerMixin.<lambda>>)
+→ str
+Gets a string representation of the tree rooted with this EntityList collection.
+
+Parameters
+predicate (Callable[['Entity'], bool], optional) . A function whose argument isthe entity being visited and returns a bool value for
+whether or not the entityshould be included in the output string. If no predicate is
+specified, all entities willbe included.
+
+Returns
+A string representation of the tree for this EntityList collection.
+
+Return type
+str
+
+walk(visitor: Callable[[Entity, int], None], predicate: Callable[[Entity], bool] = <functionEntityTreeWalkerMixin.<lambda>>, level: int = 0) → None
+Recursively walks and invokes a visitor on each Entity in this collection (if this is anEntitySet) or this Entity (if this is an Entity) and all child entities.
+
+Examples
+
+A simple use case of the walk method is to print a string representation of the tree foran Entity and its descendants:
+
+>>> part = doc.get_part('EngCylinder-01')
+>>> part.walk(lambda e, level: print(' ' * level + e.entity_name))
+In this example, we are passing in a visitor function via the lambda, that takes an entitye and the tree level level as arguments. It prints the proper indentation ‘ ‘ * level
+andthen the name of the entity.
+
+Suppose we are not interested in printing any datasets, only the names of the plots.
+We can
+expand this example to include a predicate function that will filter outdatasets:
+
+>>> part = doc.get_part('EngCylinder-01')
+>>> part.walk(lambda e, level: print(' ' * level + e.entity_name), lambda e: 
+e.entity_type is not EntityType.DATA)
+Parameters
+visitor (Callable[['Entity', int], None]) . A visitor function whose argumentsare the entity being visited and the current level of
+the tree where the entityresides.
+
+
+predicate (Callable[['Entity'], bool], optional) . A function whose argument isthe entity being visited and returns a bool value for
+whether or not the entityshould be visited. If no predicate is specified, all entities
+will be visited.
+
+
+level (int) . The tree level of the Entity objects being visited.
+
+
+
+
+
+ReturnsReturn type
+None
+
+classgtisoft.core.entities.EntityCreatorMixin
+Bases: object
+
+This mixin provides a method of creating new entities in an entity tree (e.g. the plots treeof
+a GU file).
+
+create_dataset(dataset_type: str, dataset_name: str = None) → gtisoft.core.entities.Entity
+Creates a new dataset entity and adds it to this EntityList collection or to the
+childrenEntityList if this is an Entity.
+
+Parameters
+dataset_type (str) . The type of dataset to create (e.g. ‘xy’, ‘xyz’, ‘tr’).
+
+
+dataset_name (str, optional) . The new dataset’s name.
+
+
+
+
+Returns
+The new dataset entity that was created.
+
+Return type
+Entity
+
+Raises
+RuntimeError . If the parent Entity of this EntityList collection (or this entity ifcalled on an
+Entity) does not support adding a new dataset.
+
+create_group(group_name: str = None) → gtisoft.core.entities.Entity
+Creates a new group entity and adds it to this EntityList collection or to the childrenEntityList if this is an Entity.
+
+Parameters
+group_name (str, optional) . The new group’s name.
+
+Returns
+The new group entity that was created.
+
+Return type
+Entity
+
+Raises
+RuntimeError . If the parent Entity of this EntityList collection (or this entity ifcalled on an
+Entity) does not support adding a new group.
+
+create_plot(plot_type: str, plot_name: str = None) → gtisoft.core.entities.Entity
+Creates a new plot entity and adds it to this EntityList collection or to the childrenEntityList if this is an Entity.
+
+Parameters
+plot_type (str) . The type of plot to create (e.g. ‘xy’, ‘contour’, ‘3dfe’).
+
+
+plot_name (str, optional) . The new plot’s name.
+
+
+
+
+Returns
+The new plot entity that was created.
+
+Return type
+Entity
+
+Raises
+RuntimeError . If the parent Entity of this EntityList collection (or this entity ifcalled on an
+Entity) does not support adding a new plot.
+
+create_separator(separator_name: str = None) → gtisoft.core.entities.Entity
+Creates a new separator entity and adds it to this EntityList collection or to the
+childrenEntityList if this is an Entity.
+
+Parameters
+separator_name (str, optional) . The new separator’s name.
+
+Returns
+The new separator entity that was created.
+
+Return type
+Entity
+
+Raises
+RuntimeError . If the parent Entity of this EntityList collection (or this entity ifcalled on an
+Entity) does not support adding a new separator.
+
+
+Docs ≫
+Plot and Dataset Types
+
+
+Plot and Dataset Types
+
+Plots
+
+Name
+
+plot_type
+
+Allowed Dataset Types
+
+../../_images/xyscatter32.gif
+XY Scatter Plot
+
+‘xy’
+
+‘xy’, ‘tr’, ‘text’
+
+../../_images/contour2d32.gif
+2D Contour Plot
+
+‘contour’
+
+‘xyz’, ‘xyzz’, ‘xxyyzz’, ‘xy’, ‘text’
+
+../../_images/contour3d32.gif
+3D Contour Plot
+
+‘3dcontour’
+
+‘xyz’, ‘xyzz’, ‘xxyyzz’, ‘text’
+
+../../_images/polar32.gif
+Polar ScatterPlot
+
+‘polar’
+
+‘tr’, ‘text’
+
+../../_images/polarcont32.gif
+Polar ContourPlot
+
+‘polarcontour’
+
+‘trz’, ‘trzz’, ‘ttrrzz’, ‘tr’, ‘text’
+
+../../_images/carpet32.gif
+Carpet Plot
+
+‘carpet’
+
+‘xy’, ‘text’
+
+../../_images/draw32.gif
+2D Spatial Plot
+
+‘2d-spatial’
+
+‘drawing’, ‘2dfe’, ‘2dfe_elements’,
+‘text’
+
+../../_images/fe-3d32.gif
+3D Spatial Plot
+
+‘3dfe’
+
+‘3dfe’, ‘text’, ‘xyz’, ‘3ddrawing’
+
+../../_images/bar32.gif
+Bar Graph
+
+‘bar’
+
+‘cy’, ‘text’
+
+../../_images/xybar32.gif
+XY Bar Graph
+
+‘barxy’
+
+‘xy’, ‘text’
+
+../../_images/plot_anim3d32.png
+Animation 3D
+
+‘anim3d’
+
+‘sphere’, ‘cylinder’, ‘box’, ‘cone’,
+‘clipplane’, ‘arrow’, ‘arrows_length’,
+‘extrusion’, ‘cad’, ‘sc’, ‘gear’, ‘text3d’,
+‘rigidbody3d’, ‘assembly’
+
+Animation 3DVehicle Driving
+
+‘anim3d_reality’
+
+‘road’, ‘vehicle’
+
+GPS Map
+
+‘map’
+
+‘gps_route’
+
+../../_images/parallel_coordinates32.png
+ParallelCoordinates Plot
+
+‘parallel-
+coordinates’
+
+‘nd’, ‘text’
+
+
+
+Datasets
+
+
+NameName
+
+DescriptionDescription
+
+dataset_typedataset_type
+
+XY
+
+2-D Cartesian Data Set
+
+‘xy’
+
+ThetaR
+
+Polar Data Set: Theta - Radius
+
+‘tr’
+
+Text
+
+Text Data Set
+
+‘text’
+
+XYZ
+
+3-D Cartesian Data Set ofScattered Points
+
+‘xyz’
+
+XYZZ
+
+3-D Cartesian Data Set ofStructured Points
+
+‘xyzz’
+
+XXYYZZ
+
+3-D Cartesian Data Set ofMapped Points
+
+‘xxyyzz’
+
+ThetaRZ
+
+Cylindrical Data Set of ScatteredPoints: Theta-Radius-Z
+
+‘trz’
+
+ThetaRZZ
+
+Cylindrical Data Set ofStructured Points: Theta-Radius-
+Z
+
+‘trzz’
+
+ThetaThetaRRZZ
+
+Cylindrical Data Set of MappedPoints: Theta-Radius-Z
+
+‘ttrrzz’
+
+Drawing
+
+Drawing Data Set
+
+‘drawing’
+
+FE2D_Nodes
+
+2-D Finite Element Data Set(triangle, quadrangle)
+
+‘2dfe’
+
+FE2D Elements
+
+2-D Finite Element Data Set(element)
+
+‘2dfe_elements’
+
+FE3D
+
+3-D Finite Element Data Set(tetrahedral, etc.)
+
+‘3dfe’
+
+3DDrawing
+
+3-D Drawing Data Set
+
+‘3ddrawing’
+
+CY
+
+String - Y Data Set
+
+‘cy’
+
+Sphere
+
+Sphere
+
+‘sphere’
+
+Cylinder
+
+Cylinder
+
+‘cylinder’
+
+Cuboid
+
+Cuboid
+
+‘box’
+
+Cone
+
+Cone
+
+‘cone’
+
+Fluid Plane
+
+Fluid Plane
+
+‘clipplane’
+
+Arrow
+
+Arrow
+
+‘arrow’
+
+Arrows
+
+Arrows
+
+‘arrows_length’
+
+Extrusion
+
+Extrusion
+
+‘extrusion’
+
+
+
+
+Name
+
+Description
+
+dataset_type
+
+CAD
+
+CAD
+
+‘cad’
+
+ModelingDimensionGeometry
+
+ModelingDimensionGeometry
+
+‘sc’
+
+Gear
+
+Gear
+
+‘gear’
+
+Text 3D
+
+Text 3D
+
+‘text3d’
+
+Rigid Body 3D
+
+Rigid Body 3D
+
+‘rigidbody3d’
+
+Assembly
+
+Assembly
+
+‘assembly’
+
+Road
+
+Road
+
+‘road’
+
+Vehicle Subassembly
+
+Vehicle Subassembly
+
+‘vehicle’
+
+GPS Route
+
+GPS Route
+
+‘gps_route’
+
+N-Dimensional
+
+N-D Cartesian Data Set ofScattered Points
+
+‘nd’
+
+
+
+
+Docs ≫
+Gtt
+
+
+Gtt
+
+GT-SUITE stores static information about templates and their properties in a file called theGTT. The Gtt module provides methods to query some of this information.
+
+Module Documentation
+
+classgtisoft.core.gtt.Gtt(unit_service_wrapper)
+Bases: object
+
+This class contains collections for accessing the GTT database. This database providesstatic
+information (such and available units and unit categories) for the Application.
+
+propertyunit_categories
+gtisoft.core.units.UnitCategories:
+Read-Only; A collection of all unit categoriesavailable in the application.
+
+propertyunits
+gtisoft.core.units.Units:
+Read-Only; A collection of all units available in theapplication.
+
+
+Docs ≫
+Objects
+
+
+Objects
+
+The Objects module contains functions and classes for creating, editing, and deleting the GT-
+objects in a model.
+
+Module Documentation
+
+exceptiongtisoft.core.objects.InvalidObjectNameError(name, message=None)
+Bases: Exception
+
+Raised when an Object name is set to an invalid value. An invalid name may be one thatcontains disallowed characters or is already used by another object from the sametemplate.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+exceptiongtisoft.core.objects.CreateObjectError(message=None)
+Bases: Exception
+
+Raised when there is an error attempting to create a new Object.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+exceptiongtisoft.core.objects.DeleteObjectError(message=None)
+Bases: Exception
+
+Raised when there is an error attempting to delete an Object from this collection.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+classgtisoft.core.objects.Objects(object_provider_wrapper)
+Bases: collections.abc.Mapping
+
+This class is a collection that belongs to a gtisoft.core.documents.Document object andcontains all of the GT-objects for a model.
+
+Notes
+
+Objects is a Mapping that behaves similarly to a Python dict. The keys to
+the mappingare a dict containing the GT-object’s template name and object name:
+
+key = { 'template_name': 'PipeRound', 'object_name': 'PipeRound-1' }
+and the values are instances of Object that represent GT-objects in the model.
+
+The function create_object_key() is provided as a convenience for creating the dict
+keysfor an Objects collection:
+
+key = create_object_key('PipeRound', 'PipeRound-1')
+Many of the dict methods are present in the Objects class as well as many of the samecapabilities.
+
+For instance, checking for the presence of an object in a document can be done using thePython
+membership operators:
+
+>>> key = {'template_name' : 'PipeRound', 'object_name': 'PipeRound-1' }
+>>> print(key in objects)
+True
+>>> key = {'template_name' : 'PipeRound', 'object_name': 'MissingObject' }
+>>> print(key not in objects)
+True
+Objects is “scriptable”, enabling getting objects from the model using brackets:
+
+key = {'template_name' : 'PipeRound', 'object_name': 'MissingObject' }
+obj = objects[key]
+Objects also allows iterating over all the objects in a model using the default iterator:
+
+
+for key in objects: 
+print(key)
+One difference between a standard dict and an Objects object is that the in,
+not in andsubscript operations will accept either the dictionary key or an
+Object instance:
+
+>>> key = create_object_key('PipeRound', 'PipeRound-1')
+>>> print(key in objects)
+True
+>>> obj_1 = objects[key]
+>>> print(obj_1 in objects)
+True
+>>> obj_2 = objects[obj_1]
+>>> print(obj_1 == obj_2)
+True
+See also
+
+Documentation for Python dict type.
+
+create_object(template_name, object_name)
+Creates a new Object and adds it to this collection (and the document that owns it).
+
+Parameters
+template_name (str) . The name of the template that the new object shouldbe derived from.
+
+
+object_name (str) . The name to use for the new object. If an object from thesame template with the given
+name already exists, an available name will bechosen based on the given name.
+
+
+
+
+Returns
+The newly created Object.
+
+Return type
+Object
+
+Raises
+CreateObjectError . If the template with the given name does not exist or theobject could not be created
+for any other reason.
+
+
+create_object_copy(other_object)
+Creates a copy of the given Object and adds it to this collection (and the documentthat
+owns it). The new object’s name will be the next available name based on thesource object’s
+name. All the attribute values from the source object will be copied tothe new object.
+
+Parameters
+other_object (Object) . The Object to copy.
+
+Returns
+A newly created Object that is a copy of other_object.
+
+Return type
+Object
+
+Raises
+exceptions.TypeError . If other_object is not an instance of Object.
+
+
+CreateObjectError . If the object could not be created for any other reason.
+
+
+
+
+delete_object(template_name, object_name)
+Deletes an object and all of its child parts from this collection (and the document thatowns it).
+
+Parameters
+template_name (str) . The name of the template for the object to delete.
+
+
+object_name (str) . The name of the object to delete.
+
+
+
+
+Returns
+Object . The Object instance that was removed from this collection, if anobject with the given
+template name and object name was found.
+
+
+None . If no object with the given template name and object name exists in thiscollection.
+
+
+
+
+Raises
+DeleteObjectError . I the object or any of its children cannot be deleted for anyreason.
+
+find_objects(template_name=None, object_name=None)
+Finds any objects in this collection that match the given criteria.
+
+Parameters
+template_name (str, optional) . The template name to match. If no templatename is provided, it will not be used when
+performing the search and objectsfrom any template may be returned.
+
+
+object_name (str, optional) . The object name to match. If no object name isprovided, it will not be used when
+performing a search and objects with anyname may be returned.
+
+
+
+
+Returns
+A list of objects that match the given search criteria. An empty list will be returnedif there are no matches.
+
+Return type
+list of Object
+
+get_object(template_name, object_name)
+Gets an instance of Object with the given template and object name from thiscollection.
+
+Parameters
+template_name (str) . The name of the template of the object to get.
+
+
+object_name (str) . The name of the object to get.
+
+
+
+
+Returns
+An instance of Object for the GT-object with the given template name and objectname.
+
+Return type
+Object
+
+Raises
+exceptions.KeyError . If a GT-object with the given template name and objectname is not present in this
+collection.
+
+items()
+Gets a list of key-value pairs for all the GT-objects in this collection where the key is adict containing the GT-object’s template name and object name:
+
+key = { 'template_name': 'PipeRound', 'object_name': 'PipeRound-1' }
+and the value is an instance of Object.
+
+Returns
+A list of key-value pairs where the key is a dict and the value is an Object
+
+Return type
+list of (dict, Object)
+
+keys()
+Gets a new view of the keys for all the objects in this collection. A key is a dictcontaining the GT-object’s template name and object name:
+
+key = { 'template_name': 'PipeRound', 'object_name': 'PipeRound-1' }
+Returns
+A list of keys for all the objects in this collection
+
+Return type
+list of dict
+
+values()
+Gets a list of Object instances for all the GT-objects in this collection.
+
+Returns
+A list of all the GT-objects in this collection.
+
+Return type
+list of Object
+
+classgtisoft.core.objects.Object(object_wrapper)
+Bases: gtisoft.core.objects.GtDocumentResourceMixin
+
+An Object instance represents and provides methods for interacting with a GT-object in aGT application.
+
+propertyattribute_values
+gtisoft.core.attributes.Attributes:
+Read-Only; The Attributes instance that containsthe collection of attribute values
+for the object.
+
+propertyobject_namestr:
+Gets or sets the name of the object.
+
+Raises
+InvalidObjectNameError . When setting the name, if the new name is invalid.
+
+propertytemplate_name
+str:
+Read-Only; The name of the template that this object is derived from.
+
+gtisoft.core.objects.create_object_key(template_name, object_name)
+Provides a convenient way to create a key for getting values from an Objects collection.
+
+The resulting dictionary can be used directly with an Objects collection:
+
+key = create_object_key('PipeRound', 'PipeRound-1')
+obj = objects[key]
+Or it can also be passed in to methods with named template_name and object_nameparameters:
+
+key = create_object_key('PipeRound', 'PipeRound-1')
+obj = objects.get_object(**key)
+Parameters
+template_name (str) . The name of the template of the object to get.
+
+
+object_name (str) . The name of the object to get.
+
+
+
+
+ReturnsA dictionary of the form::
+{‘template_name’: template_name, ‘object_name’: object_name}
+
+Return type
+dict
+
+
+Docs ≫
+Parts
+
+
+Parts
+
+The Parts module contains functions and classes for creating, editing, and deleting the partsin a
+model.
+
+Module Documentation
+
+exceptiongtisoft.core.parts.InvalidPartNameError(name, message)
+Bases: Exception
+
+Raised when a Part name is set to an invalid value. An invalid name may be one thatcontains disallowed characters, is blank, contains or starts with reserved words (‘ign’ or‘def’), is longer than the maximum allowed number of characters, or is already used byanother
+part in the model.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+exceptiongtisoft.core.parts.CreatePartError(message)
+Bases: Exception
+
+Raised when there is an error attempting to create a new Part.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+exceptiongtisoft.core.parts.DeletePartError(message)
+Bases: Exception
+
+Raised when there is an error attempting to delete a Part from this collection.
+
+Variables
+message (str) . A message describing the error.
+
+
+Parameters
+message (str, optional) . A message describing the error.
+
+classgtisoft.core.parts.Parts(part_provider_wrapper)
+Bases: collections.abc.Mapping
+
+This class is a collection that belongs to a gtisoft.core.documents.Document object andcontains all of the parts for a model.
+
+Notes
+
+Parts is a Mapping that behaves similarly to a Python dict. The keys to
+the mapping are apart’s name (type str) and the values are instances of Part that
+represent parts in themodel.
+
+Many of the dict methods are present in the Parts class as well as many of the samecapabilities.
+
+For instance, checking for the presence of a part in a document can be done using thePython
+membership operators:
+
+print('PipeRound-1' in objects)
+print('MissingPart-1' not in objects)
+Parts is “scriptable”, enabling getting parts from the model using brackets:
+
+part = parts['PipeRound-1']
+Parts also allows iterating over all the parts in a model using the default iterator:
+
+for part_name in parts: 
+print(part_name)
+One difference between a standard dict and a Parts object is that the in,
+not in andsubscript operations will accept either the dictionary key or a Part
+instance:
+
+>>> print('PipeRound-1' in parts)
+True
+>>> part_1 = parts['PipeRound-1']
+>>> print(part_1 in parts)
+True
+
+>>> part_2 = parts[part_1]
+>>> print(part_1 == part_2)
+True
+See also
+
+Documentation for Python dict type.
+
+create_part(template_name, object_name, part_name=None, assembly_name=None,
+location_x=None, location_y=None, icon_index=-1, icon_width=None, icon_height=None,
+icon_orientation='0', is_icon_inverted=False)
+Creates a new Part and adds it to this collection (and the document that owns it).
+
+Parameters
+template_name (str) . The name of the template that the new part should bederived from.
+
+
+object_name (str) . The name of the object that the new part should be achild of.
+
+
+part_name (str, optional) . The name to use for the new part. If not specified,
+an available part name will be
+generated based on the parent object’s name.
+
+
+assembly_name (str, optional) .
+
+The name of the internal assembly to place the new part in. If not specified, the part
+will be placed in the Main assembly.
+
+
+location_x (int, optional) . The x-coordinate on the map for the new part, inpixels. The origin (0,0) is the top
+left of the map and positive X is to the right. Ifa location is not specified, the
+next available space will be chosen (left to right,
+top to bottom).
+
+
+location_y (int, optional) . The y-coordinate on the map for the new part, inpixels. The origin (0,0) is the top
+left of the map and positive Y is down.
+
+
+icon_index (int, optional) . The index of the desired GT-supplied icon. Thedefault map icon is used by default.
+
+
+icon_width (int, optional) . The width of the new part. Parts are sized relativeto the center. Defaults to None,
+which specifies that the original width will beused. Icon widths are expected to be a
+minimum of 16 pixels.
+
+
+icon_height (int, optional) . The height of the new part. Parts are sizedrelative to the center. Defaults to None,
+which specifies that the original heightwill be used. Icon heights are expected to be
+a minimum of 16 pixels.
+
+
+
+
+
+icon_orientation (str, optional) . The orientation of the icon. Accepted stringsare “0”, “90”, “180”, and “270”. Each
+option is a measure of how much the iconwill be rotated clockwise, with “0” being the
+original, upright position.
+
+
+is_icon_inverted (bool, optional) . If True, the icon is inverted. False by default.
+
+
+
+
+Returns
+The newly created Part.
+
+Return type
+Part
+
+Raises
+InvalidPartNameError . If the part_name parameter was not None and is aninvalid name. An invalid name may
+be one that contains disallowed characters,
+is blank, contains or starts with reserved
+words (‘ign’ or ‘def’), is longer than themaximum allowed number of characters, or is
+already used by another part inthe model.
+
+
+CreatePartError . If the template with the given name does not exist, theparent object with the given
+name does not exist, or if the part could not becreated for any other reason.
+
+
+
+
+create_part_copy(other_part)
+Creates a copy of the given Part and adds it to this collection (and the document thatowns it). The new part’s name will be the next available name based on the sourcepart’s
+name. All attribute part override values from the source part will be copied tothe new
+part.
+
+Parameters
+other_part (Part) . The Part to copy.
+
+Returns
+A newly created Part that is a copy of other_part.
+
+Return type
+Part
+
+Raises
+exceptions.ValueError . If other_part is not an instance of Part.
+
+
+CreatePartError . If the part could not be created for any other reason.
+
+
+
+
+delete_part(part_name)
+Deletes a part from this collection (and the document that owns it).
+
+
+Parameters
+part_name (str) . The name of the part to delete.
+
+Returns
+Part . The Part instance that was removed from this collection, if a part withthe given name
+was found.
+
+
+None . If no part with the given name exists in this collection.
+
+
+
+
+Raises
+DeletePartError . If the part with the given name exists but cannot be deleted forany reason.
+
+find_parts(template_name=None, object_name=None, part_name=None)
+Finds any parts in this collection that match the given criteria.
+
+Parameters
+template_name (str, optional) . The template name to match. If no templatename is provided, parts from any template
+may be returned.
+
+
+object_name (str, optional) . The object name to match. If no object name isprovided, parts from any object may be
+returned.
+
+
+part_name (str, optional) . The part name to match. If no part name isprovided, parts with any name may be
+returned.
+
+
+
+
+Returns
+A list of parts that match the given search criteria.
+
+Return type
+list of Part
+
+get_part(part_name)
+Gets an instance of Part with the given name from this collection.
+
+Parameters
+part_name (str) . The name of the part to get.
+
+Returns
+An instance of Part for the part with the given name.
+
+Return type
+Part
+
+Raises
+exceptions.KeyError . If a part with the given name is not present in thiscollection.
+
+items()
+Gets a list of key-value pairs for all the parts in this collection where the key is a partname as a str and the value is an instance of Part.
+
+Returns
+A list of key-value pairs where the key is a str part name and the value is a Part.
+
+Return type
+list of (str, Part)
+
+keys()
+Gets a new view of the keys for all the parts in this collection. A key is the part’s name
+as a str.
+
+Returns
+A list of keys for all the parts in this collection.
+
+Return type
+list of str
+
+values()
+Gets a list of Part instances for all the parts in this collection.
+
+Returns
+A list of all the parts in this collection.
+
+Return type
+list of Part
+
+classgtisoft.core.parts.Part(part_wrapper)
+Bases: object
+
+A Part instance represents and provides methods for interacting with a part in a GTapplication.
+
+propertyassembly_name
+str:
+Read-Only; The name of the internal assembly that this part is in.
+
+propertyattribute_override_values
+gtisoft.core.attributes.Attributes:
+Read-Only; The Attributes instance that containsthe collection of attribute
+part override values.
+
+propertyattribute_values
+gtisoft.core.attributes.Attributes:
+Read-Only; The Attributes instance that containsthe collection of attribute
+values for the part’s parent object.
+
+propertyicon_heightint:
+The height of the part, used to resize the icon associated with the part. Icons aresized relative to the center. Defaults to None, which specifies that the originalheight will be used. Icon heights are expected to be a minimum of 16 pixels.
+
+Raises
+exceptions.ValueError . If icon is set to be less than 16 pixels high.
+Icon heightmust be 16 pixels high or larger.
+
+propertyicon_indexint:
+The index of the part’s GT-supplied icon. 0 is the default map icon.
+
+Raises
+exceptions.ValueError . If icon index is not within range of available icons. Iconindexes are 0-based.
+
+propertyicon_orientationstr:
+The orientation of the icon. Accepted strings are “0”, “90”, “180”, and “270”. Eachoption is a measure of how much the icon will be rotated clockwise, with “0”
+beingthe original, upright position. Note that icons are rotated counterclockwise
+wheninverted.
+
+Raises
+exceptions.ValueError . If an argument other than “0”, “90”, “180”, or “270” aresent in.
+
+propertyicon_widthint:
+The width of the part, used to resize the icon associated with the part. Icons aresized relative to the center. Defaults to None, which specifies that the originalwidth will be used. Icon widths are expected to be a minimum of 16 pixels.
+
+Raises
+exceptions.ValueError . If icon is set to be less than 16 pixels wide.
+Icon widthmust be 16 pixels wide or larger.
+
+propertyis_icon_inverted
+bool:
+If True, the icon is inverted. False by default.
+
+propertylocation_x
+int:
+Read-Only; The x-coordinate of the part, in pixels. The origin (0,0) is the top leftof the map and positive X is to the right.
+
+propertylocation_y
+int:
+Read-Only; The y-coordinate of the part, in pixels. The origin (0,0) is the top leftof the map and positive Y is down.
+
+propertyobject_name
+str:
+Read-Only; The name of the part’s parent Object.
+
+propertypart_namestr:
+Gets or sets the name of the part.
+
+Raises
+InvalidPartNameError . When setting the name, if the new name is invalid.
+
+propertyplots
+gtisoft.core.plots.Plots:
+Read-Only; The Plots instance that contains the collection ofplots, plot
+requests, and plot request properties for the part.
+
+propertytemplate_name
+str:
+Read-Only; The name of the template that this part is derived from.
+
+
+Docs ≫
+Plots
+
+
+Plots
+
+The Plot module contains functions and classes turning plot requests on and off and settingplot
+request properties for parts.
+
+Module Documentation
+
+classgtisoft.core.plots.Plots(plot_provider_wrapper)
+Bases: collections.abc.Mapping
+
+This class is a collection that belongs to a gtisoft.core.parts.Part and contains theavailable plots and their settings.
+
+Notes
+
+Plots is a Mapping that behaves similarly to a Python dict. The keys to
+the mapping arethe plots’ short name (type str) and the values are instances of
+Plot.
+
+Many of the dict methods are present in the Plots class as well as many of the
+samecapabilities.
+
+For instance, checking for the presence of a plot in a part can be done using the Pythonmembership operators:
+
+>>> # Check if the part has an available plot called 'RPM'
+>>> print('RPM' in cranktrain_part.plots)
+True
+>>> print('MISSING' not in cranktrain_part.plots)
+True
+Plots is “scriptable”, enabling getting plots from a part using brackets:
+
+>>> plot = cranktrain_part.plots['RPM']
+>>> print(plot)
+Plot(plot_name=u'RPM', is_on=False, location=None, max_plot_points=None, plot_range=None,
+x_axis=None, sampling_type=None, sampling_interval=None)
+Plots also allows iterating over all the available plots in a part using the default iterator:
+
+
+>>> for plot_name in cranktrain_part.plots:
+>>> print(plot_name)
+RPM
+TORQ
+TORQ2
+...
+See also
+
+Documentation for Python dict type.
+
+items()
+Gets a list of key-value pairs for all the plots in this collection where the key is a plotshort name as a str and the value is an instance of Plot’.
+
+Returns
+A list of key-value pairs where the key is a str plot short name and the value is aPlot.
+
+Return type
+list of (str, Plot)
+
+keys()
+Gets a new view of the keys for all the plots in this collection. A key is a plot short name
+as a str.
+
+Returns
+A list of keys for all the plots in this collection.
+
+Return type
+list of str
+
+values()
+Gets a list of Plot instances for all the plots in this collection.
+
+Returns
+A list of all the plots in this collection.
+
+Return type
+list of Plot
+
+classgtisoft.core.plots.Plot(value_wrapper)
+Bases: object
+
+A Plot instance represents and provides methods for interacting with a plot, plot request,
+and
+plot request properties for a part in a GT application.
+
+propertyis_on
+bool:
+Gets or sets the flag indicating if the plot is active or not. If a plot is active, itwill result in a request that the plot be stored when the model is run.
+
+propertylocationstr:
+Gets or sets the Location property for the plot.
+
+Notes
+
+This property must be filled in when the data curves are from parts that are discretizedinto subvolumes (i.e. Pipe* parts). The positions are normalized so that '0.0' selectsthe inlet end of the pipe:
+
+pipe.plots['pres'].location = '0.0'
+and '1.0' selects the outlet:
+
+pipe.plots['pres'].location = '0.0'
+Multiple locations can be selected by adding a blank space between the values. Forexample,
+the inlet and outlet may be selected:
+
+pipe.plots['pres'].location = '0.0 1.0'
+A value of 'def' or None will reset the property to the default value, which isspecified in ‘Plot Setup’.
+
+Raises
+SetPlotPropertyError . When setting the location, if the given location is invalid, ifthe plot does not
+support the location property, or the property cannot be set forany other reason.
+
+propertymax_plot_pointsint:
+Gets or sets the Max Plot Points property for the plot.
+
+Notes
+
+The Max Plot Points property specifies the maximum number of points in each data setto be
+plotted. If the maximum number is reached, the data will be thinned to stay at orbelow the
+maximum using the algorithm specified in Output Setup > Data_Storagefolder > Thinning
+Method for Limiting Large Arrays…. The global and individual plotmaximum limits are
+40,000 points.
+
+A value of 'def' or None will reset the property to the default value, which isspecified in ‘Plot Setup’.
+
+Since this property is an int, a value of None will be returned when the value in
+theUI is 'def'.
+
+Raises
+SetPlotPropertyError . When setting the max_plot_points, if the given value isinvalid, out of range, or the
+property cannot be set for any other reason.
+
+propertyplot_name
+str:
+Read-Only; The name of the plot.
+
+propertyplot_rangestr:
+Gets or sets the Plot Range property for the plot.
+
+Notes
+
+The Plot Range property selects the range of values to be plotted. Valid values are:
+
+'LastCycle(s)' or 'LAST_CYCLES' - indicates that the data points will only be
+plottedfor the last cycle of the simulation. 'LastCycle(s)' can be used only with
+periodicsimulations.
+
+
+'EntireRun' or 'ENTIRE_RUN' - indicates that the data points will be plotted for
+theentire duration of the simulation.
+
+
+'Automatic' or 'AUTOMATIC' - indicates that the solver will select the plot rangemost appropriate for the data that is being requested. Typically 'Automatic' for anon-control object will use 'LastCycle(s)' as the plot range and a control objectwill
+use 'EntireRun'.
+
+
+
+
+A value of 'def' or None will reset the property to the default value, which isspecified in ‘Plot Setup’.
+
+Raises
+SetPlotPropertyError . When setting the plot_range, if the value is not valid, or ifthe property cannot be
+set for any other reason.
+
+propertysampling_intervalstr:
+Gets or sets the Sampling Interval property for the plot.
+
+Notes
+
+The Sampling Interval property selects the interval between which consecutive pointsare
+plotted. For example:
+
+If the Sampling Type is set to 'Degrees' and the Sampling Interval is set to
+'5', thedesired value will be plotted once every 5 degrees.
+
+
+If 'Timestep' is selected for Sampling Type, the Sampling Interval must be a
+positiveinteger.
+
+
+If Sampling Interval is set to 'def', the Sampling Type must also be set to
+'def'.
+
+
+
+
+A value of 'def' or None will reset the property to the default value, which isspecified in ‘Plot Setup’.
+
+Raises
+SetPlotPropertyError . When setting the sampling_interval, if the value is not valid,
+or if the property
+cannot be set for any other reason.
+
+propertysampling_typestr:
+Gets or sets the Sampling Type property for the plot.
+
+Notes
+
+The Sampling Type property selects how the data points are sampled. Valid values are:
+
+'Timestep'
+
+
+'Degrees' - can only be used with periodic simulations.
+
+
+'Seconds'
+
+
+
+
+A value of 'def' or None will reset the property to the default value, which isspecified in ‘Plot Setup’.
+
+If sampling_type is set to 'def', the sampling_interval must also be set to
+'def'.
+
+Raises
+SetPlotPropertyError . When setting the sampling_type, if the value is not valid, orif the property cannot
+be set for any other reason.
+
+propertyx_axisstr:
+Gets or sets the X-Axis property for the plot.
+
+Notes
+
+The X-Axis property selects the x-axis for the data points to be plotted against.
+Validvalues are:
+
+'CrankAngle' - indicates that the x-axis will be set to crank angles in units ofdegrees. 'CrankAngle' can be used only with periodic simulations.
+
+
+'Time' - indicates that the x-axis will be set to time in units of seconds.
+
+
+'Automatic' - indicates that the solver will select the x-axis most appropriate forthe data that is being requested. Typically 'Automatic' for a non-control object willuse 'CrankAngle' as the x-axis and a control object will use 'Time'. If
+'Automatic'is selected while Plot Range is set to 'EntireRun', the x-axis will
+be set to 'Time'.
+
+
+
+
+A value of 'def' or None will reset the property to the default value, which isspecified in ‘Plot Setup’.
+
+Raises
+SetPlotPropertyError . When setting the x_axis, if the value is not valid, or if theproperty cannot be
+set for any other reason.
+
+
+Docs ≫
+Signals
+
+
+Signals
+
+The Signals module contains functions and classes for creating, editing, and deleting signaland
+controls links between parts in a model.
+
+Module Documentation
+
+exceptiongtisoft.core.signals.CreateSignalError(message)
+Bases: Exception
+
+Raised when there is an error attempting to create a signal link between parts.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+exceptiongtisoft.core.signals.DeleteSignalError(message)
+Bases: Exception
+
+Raised when there is an error attempting to delete a Signal from this collection.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+exceptiongtisoft.core.signals.InvalidSignalIdError(message)
+Bases: Exception
+
+Raised when there is an error attempting to change the signal ID on one side of a Signal.
+
+Variables
+message (str) . A message describing the error.
+
+Parameters
+message (str, optional) . A message describing the error.
+
+
+classgtisoft.core.signals.Signals(signal_provider_wrapper)
+Bases: collections.abc.Mapping
+
+This class is a collection that belongs to a gtisoft.core.documents.Document object andcontains all of the signal links for a model.
+
+Notes
+
+Signals is a Mapping that behaves similarly to a Python dict. The keys to
+the mapping area dict containing the part name and signal ID for both the start and
+end sides of thesignal link:
+
+key = {SIGNAL_SIGNAL_KEY_START_PART_NAME: start_part, 
+SIGNAL_KEY_START_SIGNAL_ID: start_signal_id, 
+SIGNAL_KEY_SIGNAL_KEY_END_PART_NAME: end_part, 
+SIGNAL_KEY_END_SIGNAL_ID: end_signal_id}
+and the values are instances of Signal that represent a signal link in the model.
+
+The SIGNAL_KEY_* string constants are provided at the top level of the module and canbe used
+to construct a dictionary with the proper keys to use as a key in the Signalscollection.
+
+The function create_signal_key() is provided as a convenience for creating the
+dict keysfor an Signals collection:
+
+key = create_signal_key( 
+start_part='Int-Vel', 
+start_signal_id=None, 
+end_part='Int-Mic', 
+end_signal_id=1)
+Many of the dict methods are present in the Signals class as well as many of the samecapabilities.
+
+For instance, checking for the presence of a signal link in a document can be done usingthe
+Python membership operators:
+
+>>> key = create_signal_key(
+>>> start_part='Int-Vel',
+>>> start_signal_id=None,
+>>> end_part='Int-Mic',
+>>> end_signal_id=1)
+>>> print(key in signals)
+True
+
+>>> key = create_signal_key(
+>>> start_part='Missing-Part-1',
+>>> start_signal_id=None,
+>>> end_part='Missing-Part-1',
+>>> end_signal_id=1)
+>>> print(key not in links)
+True
+Signals is “scriptable”, enabling getting signal links from the model using brackets:
+
+key = create_signal_key( 
+start_part='Int-Vel', 
+start_signal_id=None, 
+end_part='Int-Mic', 
+end_signal_id=1)
+signal = signals[key]
+Signals also allows iterating over all the signal links in a model using the default
+iterator:
+
+for key in signals: 
+print(key)
+One difference between a standard dict and a Signals object is that the in,
+not in andsubscript operations will accept either the dictionary key or a Signal
+instance:
+
+>>> key = create_signal_key(
+>>> start_part='Int-Vel',
+>>> start_signal_id=None,
+>>> end_part='Int-Mic',
+>>> end_signal_id=1)
+>>> print(key in signals)
+True
+>>> signal_1 = signals[key]
+>>> print(signal_1 in signals)
+True
+>>> signal_2 = signals[signal_1]
+>>> print(signal_1 == signal_2)
+True
+See also
+
+Documentation for Python dict type.
+
+create_signal(start_part, start_signal_id, end_part, end_signal_id)
+Creates a signal link between two parts in the model and adds the resulting Signalinstances to this collection (and the document that owns it).
+
+Parameters
+start_part (str) . The name of the part at the start of the signal link.
+
+
+start_signal_id (int) . The ID of the signal at the start of the signal link. Maybe ‘None’ if there is no
+signal at the start of the link (for instance a signal linkstarting at a SensorConn
+part).
+
+
+end_part (str) . The name of the part at the end of the signal link.
+
+
+end_signal_id (int) . The ID of the signal at the end of the signal link. May be‘None’ if there is no signal
+at the end of the link (for instance a signal linkterminating at a SensorConn part).
+
+
+
+
+Returns
+A list of the newly created Signal instances.
+
+Return type
+list of Signal
+
+Raises
+CreateSignalError . If the signal link could not be created for any reason.
+
+delete_signal(start_part, start_signal_id, end_part, end_signal_id)
+Deletes the signal link that exactly matches the given parameters.
+
+Parameters
+start_part (str) . The name of the part at the start of the signal link.
+
+
+start_signal_id (int) . The ID of the signal at the start of the signal link. Maybe ‘None’ if there is no
+signal at the start of the link (for instance a signal linkstarting at a SensorConn
+part).
+
+
+end_part (str) . The name of the part at the end of the signal link.
+
+
+end_signal_id (int) . The ID of the signal at the end of the signal link. May be‘None’ if there is no signal
+at the end of the link (for instance a signal linkterminating at a SensorConn part).
+
+
+
+
+Returns
+Signal . A Signal instance representing the deleted signal link, if one wasremoved. The
+returneed Signal is read-only.
+
+
+None . If no signal link with the given parameters exists in this collection.
+
+
+
+
+Raises
+DeleteSignalError . If the signal link can not be deleted for any reason.
+
+find_signals(start_part=None, start_signal_id=None, end_part=None, end_signal_id=None)
+Finds any signal links in this collection that match the given criteria. All parameters areoptional and any parameter that is not provided or is None will be ignored whenperforming
+the search.
+
+Parameters
+start_part (str, optional) . The name of the part at the start of the signal link.
+
+
+start_signal_id (int, optional) . The ID of the signal at the start of the signallink.
+
+
+end_part (str, optional) . The name of the part at the end of the link.
+
+
+end_signal_id (int, optional) . The ID of the signal at the end of the signal link.
+
+
+
+
+Returns
+A list of Signals that match the given search criteria. An empty list will be returnedif
+there are no matches.
+
+Return type
+list of Signal
+
+get_signal(start_part, start_signal_id, end_part, end_signal_id)
+Gets an instance of ‘Signal’ that exactly matches the given parameters.
+
+Parameters
+start_part (str) . The name of the part at the start of the signal link.
+
+
+start_signal_id (int) . The ID of the signal at the start of the signal link. Maybe ‘None’ if there is no
+signal at the start of the link (for instance a signal linkstarting at a SensorConn
+part).
+
+
+end_part (str) . The name of the part at the end of the signal link.
+
+
+end_signal_id (int) . The ID of the signal at the end of the signal link. May be‘None’ if there is no signal
+at the end of the link (for instance a signal linkterminating at a SensorConn part).
+
+
+
+
+Returns
+An instance of Signal for the signal link that matches the given parameters.
+
+Return type
+Signal
+
+
+Raises
+excepctions.KeyError . If no signal link with the given parameters exists in thiscollection.
+
+items()
+Gets a list of key-value pairs for all the signal links in this collection where the key is
+a dict containing the part name and signal ID for both the start and end sides of thesignal link, for example:
+
+key = { 
+SIGNAL_SIGNAL_KEY_START_PART_NAME: 'Int-Vel', 
+SIGNAL_KEY_START_SIGNAL_ID: None, 
+SIGNAL_KEY_SIGNAL_KEY_END_PART_NAME: 'Int-Mic', 
+SIGNAL_KEY_END_SIGNAL_ID: 1}
+and the value is an instance of Signal.
+
+Returns
+A list of key-value pairs where the key is a dict and the value is a Signal
+
+Return type
+list of (dict, Signal)
+
+keys()
+Gets a new view of the keys for all the signal links in this collection. A key is a dictcontaining the containing the part name and signal id for both the start and end sidesof
+the signal link, for example:
+
+key = { 
+SIGNAL_SIGNAL_KEY_START_PART_NAME: 'Int-Vel', 
+SIGNAL_KEY_START_SIGNAL_ID: None, 
+SIGNAL_KEY_SIGNAL_KEY_END_PART_NAME: 'Int-Mic', 
+SIGNAL_KEY_END_SIGNAL_ID: 1}
+Returns
+A list of keys for all the signal links in this collection
+
+Return type
+list of dict
+
+values()
+Gets a list of Signal instances for all the signal links in this collection.
+
+
+Returns
+A list of all the signal links in this collection.
+
+Return type
+list of Signal
+
+classgtisoft.core.signals.Signal(signal_wrapper)
+Bases: object
+
+A Signal instance represents and provides methods for interacting with a signals orcontrols
+link in a GT application.
+
+set_signal_id_at_part(part_name, signal_id)
+Sets the signal id for the signal link at the side connected to the given part.
+
+Parameters
+part_name (str) . The name of the part connected to the signal link on theside (‘start’ or ‘end’) that
+should be changed.
+
+
+signal_id (int) . The new signal ID to set.
+
+
+
+
+Raises
+InvalidSignalIdError . If the signal ID is invalid or if the signal ID cannot bechanged for any other reason.
+
+propertyattribute_values
+gtisoft.core.attributes.Attributes:
+Read-Only; The Attributes instance that containsthe collection of attribute values
+for the signal link.
+
+propertyend_part_name
+str:
+Read-Only; Gets the name of the part at the ‘end’ side of the signal link.
+
+propertyend_signal_idint:
+Gets or sets the id of the signal at the ‘end’ side of the signal link.
+
+Raises
+InvalidSignalIdError . When setting the signal ID, if the ID is invalid.
+
+propertyend_signal_unitUnit:
+Gets or sets the unit for the signal at the ‘end’ side of the signal link. The setteraccepts either a single instance of Unit or a list of Unit to facilitate using thegtisoft.core.units.UNITS collection:
+
+# Using a single unit:
+a_unit = signal_a.end_signal_unit
+signal_b.end_signal_unit = a_unit
+# Passing in a list using the UNIT collection:
+signal_c.end_signal_unit = UNITS['rad']
+Raises
+InvalidSignalUnitError . When setting the signal Unit, if the Unit is invalid
+
+propertystart_part_name
+str:
+Read-Only; Gets the name of the part at the ‘start’ side of the signal link.
+
+propertystart_signal_idint:
+Gets or sets the id of the signal at the ‘start’ side of the signal link.
+
+Raises
+InvalidSignalIdError . When setting the signal ID, if the ID is invalid.
+
+propertystart_signal_unitUnit:
+Gets or sets the unit for the signal at the ‘start’ side of the signal link. The setteraccepts either a single instance of Unit or a list of Unit to facilitate using agtisoft.core.units.Units collection:
+
+# Using a single unit:
+a_unit = signal_a.start_signal_unit
+signal_b.start_signal_unit = a_unit
+# Passing in a list using the UNIT collection:
+signal_c.start_signal_unit = UNITS['rad']
+Raises
+InvalidSignalUnitError . When setting the signal Unit, if the Unit is invalid
+
+gtisoft.core.signals.create_signal_key(start_part, start_signal_id, end_part, end_signal_id)
+Provides a convenient way to create a key for getting values from a Signals collection.
+
+The resulting dictionary can be used directly with a Signals collection:
+
+key = create_signal_key( 
+start_part='Int-Vel', 
+start_signal_id=None, 
+end_part='Int-Mic', 
+end_signal_id=1)
+signal = signals[key]
+Or it can also be passed in to methods with start_part, start_signal_id,
+etc parameters:
+
+key = create_signal_key( 
+start_part='Int-Vel', 
+start_signal_id=None, 
+end_part='Int-Mic', 
+end_signal_id=1)
+signal = signals.get_signal(**key)
+Note that calling the method using named parameters as in the above examples addsadditional
+clarity but is not strictly necessary:
+
+key = create_signal_key('Int-Vel', None, 'Int-Mic', 1)
+Parameters
+start_part (str) . The name of the part at the start of the signal link.
+
+
+start_signal_id (int) . The ID of the signal at the start of the signal link. May be‘None’ if there is no signal at
+the start of the link (for instance a signal link startingat a SensorConn part).
+
+
+end_part (str) . The name of the part at the end of the signal link.
+
+
+end_signal_id (int) . The ID of the signal at the end of the signal link. May be‘None’ if there is no signal at
+the end of the link (for instance a signal linkterminating at a SensorConn part).
+
+
+
+
+Returns
+A dictionary of the form:
+
+{SIGNAL_SIGNAL_KEY_START_PART_NAME: start_part,
+SIGNAL_KEY_START_SIGNAL_ID: start_signal_id,
+SIGNAL_KEY_SIGNAL_KEY_END_PART_NAME: end_part,
+SIGNAL_KEY_END_SIGNAL_ID: end_signal_id}
+
+Return type
+dict
+
+gtisoft.core.signals.convert_to_signal_key(obj)
+Provides a convenient way of converting a Signal instance into a dictionary key for gettingvalues from a Signal collection.
+
+While get and delete operations can be performed on the Signal collection using a signaldirectly:
+
+>>> # assume `signal_1` is an existing instance of `Signal`
+>>> signal_2 = signals[signal_1]
+>>> print(signal_1 == signal_2)
+True
+>>> del signals[signal_1]
+>>> print(signal_1 in signals)
+False
+the convert_to_signal_key method may still useful for calling methods that take theanalogous
+arguments using “keyword argument unpacking” with **:
+
+>>> # assume `signal_1` is an existing instance of `Signal`
+>>> del signals[signal_1]
+>>> print(signal_1 in signals)
+False
+>>> # re-create the signal that was just deleted
+>>> signals.create_signal(**signal_1)
+>>> print(signal_1 in signals)
+True
+Parameters
+obj (Signal or dict) . An instance of Signal or a dict containing all the keys for aSignal key (see
+SIGNAL_KEY_* constants).
+
+Returns
+A dictionary of the form:
+
+{SIGNAL_SIGNAL_KEY_START_PART_NAME: start_part,
+SIGNAL_KEY_START_SIGNAL_ID: start_signal_id,
+SIGNAL_KEY_SIGNAL_KEY_END_PART_NAME: end_part,
+SIGNAL_KEY_END_SIGNAL_ID: end_signal_id}
+Return type
+dict
+
+Raises
+TypeError . If the obj parameter is not a Signal or dict instance.
+
+
+KeyError . If the obj parameter is a dict instance but does not contain all of therequired keys.
+
+
+
+
+gtisoft.core.signals.SIGNAL_KEY_START_PART_NAME= 'start_part'
+str:
+Key that maps to the name of the part at the ‘start’ side of a signal link. Use toconstruct a
+dictionary to use as a key into a Signals collection.
+
+See create_signal_key() and Signals.
+
+gtisoft.core.signals.SIGNAL_KEY_START_SIGNAL_ID= 'start_signal_id'
+str:
+Key that maps to the ID of the signal at the ‘start’ side of a signal link. Use toconstruct a
+dictionary to use as a key into a Signals collection.
+
+See create_signal_key() and Signals.
+
+gtisoft.core.signals.SIGNAL_KEY_END_PART_NAME= 'end_part'
+str:
+Key that maps to the name of the part at the ‘end’ side of a signal link. Use toconstruct a
+dictionary to use as a key into a Signals collection.
+
+See create_signal_key() and Signals.
+
+gtisoft.core.signals.SIGNAL_KEY_END_SIGNAL_ID= 'end_signal_id'
+str:
+Key that maps to the ID of the signal at the ‘end’ side of a signal link. Use toconstruct a
+dictionary to use as a key into a Signals collection.
+
+See create_signal_key() and Signals.
+
+
+Docs ≫
+Simulations
+
+
+Simulations
+
+The Simulations module contains methods and classes for running local simulations.
+
+Module Documentation
+
+classgtisoft.core.simulations.SimulationManager(simulation_manager_wrapper)
+Bases: object
+
+The SimulationManager object provides methods for creating .dat files and running localsimulations.
+
+create_dat_file(document, **kwargs)
+Creates a .dat file for the document.
+
+Notes
+
+This will save any unsaved changes in the document, effectively overwriting it, andalso
+overwrite any existing .dat file for the model without warning.
+
+Parameters
+document (gtisoft.core.documents.Document) . The document for which to createthe .dat file.
+
+
+**kwargs . A set of keyword arguments specifying the options for creating the.dat file.
+See below.
+
+
+
+
+Keyword Arguments
+implicitConflict (str) . Valid values: update, keep, fail.
+Defines what action totake if an implicit object in the model differs from the parent
+implicit object inthe Object Library. If the model had been run from GT-ISE, a dialog
+would askwhat to do with the items which are in conflict. The default behavior if noargument is given is “keep”.
+
+
+SAObjectConflict (str) . Valid values: keep, override, rename, fail.
+Defines whataction to take if an object in an external subassembly has the same name as
+anobject in the main model but has differences in its data. If the model was runfrom
+GT-ISE, a dialog would ask what to do with the items which are in conflict.
+The default
+behavior is to KEEP the existing objects.
+
+
+
+
+
+doe (str) . Valid values: on, off.
+For model files that have a DOE configured,
+this argument gives options to activate the
+DOE cases (on) or run ignore theDOE and run the values in Case Setup (off). If this
+argument is omitted, thedefault setting is on.
+
+
+
+
+Raises
+gtisoft.core.documents.DocumentClosedError . If the document argument is aDocument instance that is not currently open.
+
+
+exceptions.RuntimeError . If the .dat file could not be created for any otherreason.
+
+
+
+
+run_simulation(document, **kwargs)
+Starts running a local simulation.
+
+Parameters
+document (gtisoft.core.documents.Document) . The document to run.
+
+
+**kwargs . A set of keyword arguments specifying the options for thesimulation.
+See below.
+
+
+
+
+Keyword Arguments
+p (str) . Valid values: on, off, fmu.
+Specifies whether the run is a preprocessrun. Default=`off`, which means regular,
+on`= preprocess only, `fmu is a specialpreprocess run for creating *.fmu files.
+
+
+g (str) . Valid values: on, off.
+Specifies the location of the solver output. If onthe output will be displayed in the
+Simulation Dashboard. If off the the outputwill be displayed in the console window.
+
+
+m (str) . Valid values: on, off.
+Specifies whether the monitors should beenabled.
+
+
+implicitConflict (str) . Valid values: update, keep, fail.
+Defines what action totake if an implicit object in the model differs from the parent
+implicit object inthe Object Library. If the model had been run from GT-ISE, a dialog
+would askwhat to do with the items which are in conflict. The default behavior if noargument is given is “keep”.
+
+
+SAObjectConflict (str) . Valid values: keep, override, rename, fail.
+Defines whataction to take if an object in an external subassembly has the same name as
+anobject in the main model but has differences in its data. If the model was runfrom
+GT-ISE, a dialog would ask what to do with the items which are in conflict.
+The default
+behavior is to KEEP the existing objects.
+
+
+
+
+
+doe (str) . Valid values: on, off.
+For model files that have a DOE configured,
+this argument gives options to activate the
+DOE cases (on) or run ignore theDOE and run the values in Case Setup (off). If this
+argument is omitted, thedefault setting is on.
+
+
+
+
+Raises
+gtisoft.core.documents.DocumentClosedError . If the document argument is aDocument instance that is not currently open.
+
+
+exceptions.RuntimeError . If the simulation could not be started for any otherreason.
+
+
+
+
+
+Docs ≫
+Units
+
+
+Units
+
+The Units module contains dictionaries that provide access to all the valid units and unitcategories for GT Applications.
+
+Module Documentation
+
+classgtisoft.core.units.Unit(unit_wrapper)
+Bases: object
+
+Represents the unit of a physical quantity.
+
+propertygtt_id
+int:
+Read-Only; The database (gtt) ID that is used by GT Applications to refer to thisunit.
+
+propertymultiplier
+float:
+Read-Only; The multiplier to convert the unit to the base unit of the category.
+
+propertyunit_category
+str:
+Read-Only; The upper-case, human-readable name of this unit’s parent category.
+Corresponds to the category_name attribute in the UnitCategory class.
+
+propertyunit_name
+str:
+Read-Only; The name of this unit (e.g. mm or m/s).
+
+classgtisoft.core.units.UnitCategory(wrapper)
+Bases: collections.abc.Sequence
+
+A UnitCategory is a sequence of units that all represent the same type of physical quantity,
+for instance DISTANCE contains the units mm, m, ft, and others.
+
+propertycategory_name
+str:
+Read-Only; An upper-case, human-readable name for this unit category.
+
+propertygtt_id
+int:
+Read-Only; The database (gtt) ID that is used by GT Applications to refer to thisunit category.
+
+classgtisoft.core.units.Units(wrapper)
+Bases: collections.abc.Mapping
+
+A dictionary that contains all valid units for GT Applications. The keys to the dictionaryare
+str that correspond to the unit’s names, and the values are list of Unit
+instancesthat have that name.
+Values are a list of units instead of a single instance because it ispossible for multiple units to
+share the same name as long as they belong to differentcategories. For example, ‘deg’ and ‘rad’ are
+used by both the ‘ANGLE’ and ‘ANGLE 3D’categories:
+
+>>> units = Application.get_instance().gtt.units
+>>> rads = units['rad']
+>>> print(rads)
+[Unit(gtt_id=62, name='rad', unit_category='ANGLE', multiplier=57.2957795130823), 
+Unit(gtt_id=525, name='rad', unit_category='ANGLE 3D', multiplier=57.2957795130823)]
+get_unit(unit_name: str) → gtisoft.core.units.Unit
+Gets an instance of Unit with the given name from this collection.
+
+Parameters
+unit_name (str) . The name of the unit to get.
+
+Returns
+A list of units with the given name. Return value is a list instead of a single instancebecause it is possible for multiple units to share the same name as long as theybelong
+to different categories. For example, ‘deg’ and ‘rad’ are used by both the‘ANGLE’ and
+‘ANGLE 3D’ categories:
+
+Return type
+Unit
+
+Raises
+exceptions.KeyError . If a unit with the given name is not present in thiscollection.
+
+get_unit_by_id(gtt_id: int) → Optional[gtisoft.core.units.Unit]
+Gets the Unit instance with the given gtt_id from this collection.
+
+Parameters
+gtt_id (int) . The ID of the unit to get.
+
+Returns
+Unit . If a Unit with the given ID was found.
+
+
+None . If no Unit with the given ID exists in this collection.
+
+
+
+
+get_unit_by_name_category(unit_name: str, category_name: str)
+Gets an instance of Unit with the given name and category from this collection.
+
+Parameters
+unit_name (str) . The name of the unit to get.
+
+
+category_name (str) . The name of the category the unit is in.
+
+
+
+
+Returns
+The unit with the given name and category.
+
+Return type
+Unit
+
+Raises
+exceptions.KeyError . If a unit with the given name and category is not present inthis collection.
+
+items()
+Gets a list of key-value pairs for all the units in this collection where the key is a unitname as a str and the value is an instance of Unit.
+
+Returns
+A list of key-value pairs where the key is a str unit name and the value is a Unit.
+
+Return type
+list of (str, Unit)
+
+keys() → List[str]
+Gets a new view of the keys for all the units in this collection. A key is the unit’s name
+as a str.
+
+Returns
+A list of keys for all the units in this collection.
+
+Return type
+list of str
+
+values() → List[gtisoft.core.units.Unit]
+Gets a list of Unit instances for all the parts in this collection.
+
+Returns
+A list of all the units in this collection.
+
+Return type
+list of Unit
+
+classgtisoft.core.units.UnitCategories(wrapper)
+Bases: collections.abc.Mapping
+
+A dictionary that contains all valid unit categories for GT Applications. The keys to thedictionary
+are str that corresponds to the upper-case, human-readable name for acategory, and the
+values are instances of UnitCategory. For example:
+
+>>> categories = Application.get_instance().gtt.unit_categories
+>>> cat = categories['DISTANCE'] # get the category for distance, using its string name
+>>> print(cat.gtt_id, cat.category_name, cat.units)
+DISTANCE 1 [Unit(gtt_id=4, name='in', unit_category='DISTANCE', multiplier=0.0254), 
+Unit(gtt_id=5, name='ft', unit_category='DISTANCE', multiplier=0.3048), Unit(gtt_id=3, 
+name='mm', unit_category='DISTANCE', multiplier=0.001), Unit(gtt_id=394, name='dm', 
+unit_category='DISTANCE', multiplier=0.1), Unit(gtt_id=277, name='km', 
+unit_category='DISTANCE', multiplier=1000), Unit(gtt_id=345, name='mi', 
+unit_category='DISTANCE', multiplier=1609.33), Unit(gtt_id=1, name='m', 
+unit_category='DISTANCE', multiplier=1), Unit(gtt_id=648, name='nm', 
+unit_category='DISTANCE', multiplier=1e-09), Unit(gtt_id=6, name='micron', 
+unit_category='DISTANCE', multiplier=1e-06), Unit(gtt_id=2, name='cm', 
+unit_category='DISTANCE', multiplier=0.01)]
+get_unit_category(category_name: str) → gtisoft.core.units.UnitCategory
+Gets an instance of UnitCategory with the given name from this collection.
+
+Parameters
+category_name (str) . The name of the unit category to get.
+
+Returns
+An instance of UnitCategory for the category with the given name.
+
+Return type
+UnitCategory
+
+Raises
+exceptions.KeyError . If a category with the given name is not present in thiscollection.
+
+items()
+Gets a list of key-value pairs for all the unit categories in this collection where the keyis a category name as a str and the value is an instance of UnitCategory.
+
+Returns
+A list of key-value pairs where the key is a str unit name and the value is aUnitCategory.
+
+Return type
+list of (str, UnitCategory)
+
+keys() → List[str]
+Gets a new view of the keys for all the unit categories in this collection. A key is theunit category’s name as a str.
+
+Returns
+A list of keys for all the unit categories in this collection.
+
+Return type
+list of str
+
+values() → List[gtisoft.core.units.UnitCategory]
+Gets a list of UnitCategory instances for all the parts in this collection.
+
+Returns
+A list of all the unit categories in this collection.
+
+Return type
+list of UnitCategory
+
+
+Docs ≫
+Version
+
+
+Version
+
+The Version module provides methods to query version information for models andapplications.
+
+Module Documentation
+
+classgtisoft.core.version.GTVersion(version_wrapper)
+Bases: object
+
+An object that contains version information for a document or GT Application.
+
+propertybuild_number
+str:
+*Read-Only; this version’s build number (e.g. 1 in 2020.1)
+
+propertyversion_number
+str:
+*Read-Only; this version’s number (e.g. 2020 in 2020.1)
+
+
+Docs ≫
+1. Build Spring Mass Damper
+
+
+1. Build Spring Mass Damper
+
+This example will go through some of the basics of building a model in GT-ISE using the GTPython API and covers the following topics:
+
+Opening a model in GT-ISE
+
+
+Creating new objects
+
+
+Defining attribute values
+
+
+Placing parts on the map
+
+
+Creating links between parts
+
+
+Modifying Run Setup
+
+
+Saving the resulting model
+
+
+
+
+The files associated with this example can be found in /examples/z_Interfaces_and_Co-
+Simulation_UserCode/GT_Automation_Python_Scripting_API/01-
+Build_Spring_Mass_Damper.
+
+Note
+
+The Python script featured in this example is designed to be run from inside the built-inPython editor in GT-ISE. For a version that can be run external to GT-ISE, please seeexample 4. External API Access.
+
+Overview
+
+The purpose of this example is to show how a model can be built from scratch using variouscommands within the GT Python API. The script will ultimately result in a simple mass-
+spring-damper model containing four components:
+
+Mass
+
+
+Spring
+
+
+Damper
+
+
+Ground
+
+
+
+
+
+../_images/1_mass_spring_damper_map.jpg
+A blank starter model and example Python script can be found in the example directory.
+
+Initialization
+
+This section is present at the beginning of each of the example Python scripts. The first lineof the script simply defines the model name that it will operate on: Start_Model.gtm.
+
+1modelname = 'Start_Model.gtm'
+The next line of the script connects the Python interpreter with the GT application withinwhich the script will operate. This instance is saved to the variable app so that it can bereferred to later for other application-level commands. When running this script from thebuilt-in Python editor in GT-ISE, it is necessarily implied that it will operate within the sameinstance of GT-ISE, so all arguments for get_instance() can be omitted (they are ignored ifprovided).
+
+This is followed by an open_document() call to open the starter model defined above. Thismodel resides in the same working directory as the script, so the full absolute path is notneeded. Similar to get_instance(), this is saved to the variable doc so that it can be referred tolater.
+
+1
+2app = Application.get_instance()
+doc = app.documents.open_document(modelname)
+Note
+
+In addition to opening models, the open_document() method can also be used to evolvemodels and dependencies from previous versions. By default, opening a model from aprevious version will result in a Python error unless other arguments are specified. Formore information, please see the API Documentation > Documents.
+
+
+Creating a New Object
+
+New objects can be created in a model using the documents.objects.create_object(template,
+object) method. This command has two required aruments: the template to be used, and thedesired name for the resulting object.
+
+1massobj = doc.objects.create_object('Mass', 'MassObj')
+Since it is common to perform other actions to an object after creating it, such as definingattribute values, it is generally desirable to save/return the object to a variable (massobj in theabove example) so that it can be referenced later.
+
+Defining Attribute Values
+
+When defining values for specific attributes in an object, attributes should generally bereferred to by their “short names”, which uniquely identify each attribute within a givenobject. This contrasts with the attribute names normally displayed in the object editor (alsoknown as the “long name”), as these may be duplicated folder to folder and therefore maynot be unique.
+
+Attribute short names are displayed in the object editor (in parentheses after the attributelong name) any time the built-in Python script editor is open in GT-ISE. It can also bedisplayed at all times using the setting in File > Options > Python. Please see Getting Started> Python in GT-ISE > Python Developer Info for more information.
+
+../_images/1_attr_short_names.jpg
+The object.attribute_values collection can be accessed using square brackets, i.e.
+object.attribute_values[‘short_name’]. This can be combined with the set_value(value, unit)
+method to define the attribute value and unit for a given attribute in a single line:
+
+1
+2
+3massobj.attribute_values['MASS'].set_value('0.1', UNITS['kg'])
+massobj.attribute_values['X0'].set_value('0', UNITS['mm'])
+massobj.attribute_values['X0P'].set_value('1', UNITS['m/s'])
+Note
+
+
+Units[] (and similarly, Unit_Categories[]) is a dictionary that contains all valid units for GTApplications, and allows convenient specification of unit by name. It is a saved instance ofApplication.gtt.units (set up automatically when running from the built-in Python scripteditor in GT-ISE, and optionally when accessed externally) and should generally be usedas a lookup for input into any unit arguments.
+
+Warning
+
+Though the unit argument in the set_value() method is optional, it is stronglyrecommended that units always be included when defining a numeric value. If omitted,
+the currently set units will be used, which may produce unexpected results if they do notmatch with the intended units.
+
+Placing Parts On The Map
+
+With the objects defined, the next step is to place parts on the map. This can be done usingthe documents.parts.create_part(template, object, part) method:
+
+1
+2
+3
+4groundpart = doc.parts.create_part('Ground', 'GroundObj', 'GroundPart', location_x=240, 
+location_y=120)
+springpart = doc.parts.create_part('Spring', 'SpringObj', 'SpringPart', location_x=180, 
+location_y=200)
+damperpart = doc.parts.create_part('Damper', 'DamperObj', 'DamperPart', location_x=300, 
+location_y=200)
+masspart = doc.parts.create_part('Mass', 'MassObj', 'MassPart', location_x=240, 
+location_y=300)
+The create_part() method has three required arguments, the source template name, thesource object name, and the desired part name. Note that all part names must be unique fora given model.
+
+There are also three optional arguments for the target internal subassembly (if applicable),
+and for the X and Y location on the map where the part will be placed. To aid in determiningpart locations, a tool tip with the current X/Y position of the cursor is displayed any time thebuilt-in Python script editor is open in GT-ISE. Additionally, the X/Y position of existing partson the map is displayed in the tool tip when hovering over parts.
+
+
+../_images/1_location_tool_tip.jpg
+Note
+
+If the X/Y location argument is omitted, the part will be placed in the next available spaceon the map (left to right, top to bottom). However, in most cases, it is desirable toexplicitly define the X/Y location so that the model map is laid out in a logical way.
+
+Linking Parts Together
+
+Links can be created between parts using the documents.links.create_link() method. Thismethod has six required arguments: the part name where the link starts, the port ID numberon the start part, the port folder name on the start part, the part name where the link ends,
+the port ID number on the end part, and the port folder name on the end part.
+
+Since most links in GT-SUITE have a directionality associated with them, it is generallyimportant that the start part and end part are defined in the correct order so that the link ispointing in the correct direction.
+
+1
+2
+3
+4link1 = doc.links.create_link('GroundPart', None, None, 'SpringPart', None, None)
+link2 = doc.links.create_link('SpringPart', None, None, 'MassPart', None, None)
+link3 = doc.links.create_link('GroundPart', None, None, 'DamperPart', None, None)
+link4 = doc.links.create_link('DamperPart', None, None, 'MassPart', None, None)
+Some templates in GT-ISE do not require specific port ID numbers/folders, typically if there isonly one type of port or if it does not affect modeling. This is the case for the parts above,
+where all of the links are 1D-mechanical connections that do not necessarily need to go to aspecific port. In these cases, None can be specified for the port ID and folder.
+
+Note
+
+When creating links in the GUI, certain connection parts are generated automaticallywhen linking between two components directly. This is also true when creating links fromPython. The create_link() method will return a list of two links in these scenarios.
+
+
+Modifying Run Setup
+
+The Setup menus (Run, Output, Advanced) in GT-ISE are treated similarly to standard objects,
+except they are accessed at the document level, i.e. documents.run_setup. Attributes in thesesetup menus are accessed in the same way as standard objects, via short name using theattribute_values collection.
+
+1
+2doc.run_setup.attribute_values['DURATN2'].is_radio_on = True
+doc.run_setup.attribute_values['DURATN2'].set_value('1', UNITS['s'])
+Notice that the DURATN2 attribute has both a radio button and numeric attribute valueassociated with it. Radio buttons can be set using the separate attribute property is_radio_on= True. This will automatically de-select any current radio selections in the group, as would bethe case in the GUI.
+
+Saving Models
+
+Models can be saved using the documents.save() or documents.save_as(filepath) methods. Inthis example, the completed model is saved in the same example directory as the originalmodel, with a new file name Spring_Mass_Damper_System_From_Python.gtm.
+
+1doc.save_as('Spring_Mass_Damper_System_From_Python.gtm')
+
+Docs ≫
+2. Case Setup Parameters
+
+
+2. Case Setup Parameters
+
+This example will go through modifying plots in GT-ISE and starting a simulation using the GTPython API and covers the following topics:
+
+Retrieving existing object data from the model and printing it to the output console
+
+
+Creating a new parameter in Case Setup
+
+
+Appending new cases to Case Setup
+
+
+Assigning case values for a parameter
+
+
+Defining case labels
+
+
+Turning cases on/off
+
+
+Using a parameter in an attribute
+
+
+
+
+The files associated with this example can be found in /examples/z_Interfaces_and_Co-
+Simulation_UserCode/GT_Automation_Python_Scripting_API/02-Case_Setup_Parameters.
+
+Note
+
+The Python script featured in this example is designed to be run from inside the built-inPython editor in GT-ISE. To modify it for running externally to GT-ISE, please see thedocumentation section Getting Started > External API Access > External ScriptInitialization or refer to example 4. External API Access.
+
+Initialization
+
+This section is present at the beginning of each of the example Python scripts. The first lineof the script simply defines the model name that it will operate on: Start_Model.gtm.
+
+1modelname = 'Start_Model.gtm'
+The next line of the script connects the Python interpreter with the GT application withinwhich the script will operate. This instance is saved to the variable app so that it can bereferred to later for other application-level commands. When running this script from thebuilt-in Python editor in GT-ISE, it is necessarily implied that it will operate within the sameinstance of GT-ISE, so all arguments for get_instance() can be omitted (they are ignored ifprovided).
+
+
+This is followed by an open_document() call to open the starter model defined above. Thismodel resides in the same working directory as the script, so the full absolute path is notneeded. Similar to get_instance(), this is saved to the variable doc so that it can be referred tolater.
+
+1
+2app = Application.get_instance()
+doc = app.documents.open_document(modelname)
+Note
+
+In addition to opening models, the open_document() method can also be used to evolvemodels and dependencies from previous versions. By default, opening a model from aprevious version will result in a Python error unless other arguments are specified. Formore information, please see API Documentation > Documents.
+
+Retrieving Object Data
+
+To retrieve an object that already exists in a model, the objects.get_object(template, object)
+method can be used. As in previous examples, it is generally desirable to save/return theobject to a variable (massobj in the below example) so that it can be referenced later.
+
+1massobj = doc.objects.get_object('Mass', 'MassObj')
+Object attribute values can be retrieved using the get_value() method, which accesses theobject.attribute_values collection similarly to the set_value() method covered in the previousexample.
+
+1mass = massobj.attribute_values['MASS'].get_value()
+Note
+
+The get_value() method is designed generically for both single value attributes as well astable/matrix attributes. It can therefore take two optional arguments for row and columnposition to extract any value out of a table. By default, it takes row=0 and column=0,
+which also corresponds to the position for single value attributes. The get_row() andget_column() methods can also be used to extract entire rows and columns of data,
+respectively.
+
+The attribute_values class has several useful properties, such as long_name and unit, which canalso be accessed as follows (see API Documentation > Attributes for a full list of properties):
+
+
+1
+2mass_attr_name = massobj.attribute_values['MASS'].long_name
+mass_unit = massobj.attribute_values['MASS'].unit.unit_name
+Printing Output
+
+Information extracted from the GT Python API can be printed to the output console usingthe standard Python print() command. In this example, the Mass object name, mass, and initialvelocity are printed:
+
+1
+2
+3
+4print('Current values for object: ', massobj.object_name)
+print('-------------------------------------------')
+print(mass_attr_name, '=', mass, mass_unit)
+print(x0p_attr_name, '=', x0p, x0p_unit)
+Creating a New Parameter
+
+Similar to the other Setup menus, Case Setup is accessed at the documents level. To create anew parameter, the case_setup.parameters.create_parameter() method can be used. Thismethod has four required arguments: the parameter name, parameter description, CaseSetup folder where the parameter will be placed, and the parameter unit.
+
+1mass_param = doc.case_setup.parameters.create_parameter('mass', 'Part Mass', 'Main', 
+UNITS['kg'])
+Appending Cases
+
+Cases can be added to Case Setup using the case_setup.run_cases.append_case() method. Thismethod simply appends a single new case and does not take any arguments. To add multiplecases at one time, a for loop can be used. The example script shows three cases being added:
+
+1
+2for i in range(0,3): 
+doc.case_setup.run_cases.append_case()
+Cases can also be inserted using the case_setup.run_cases.insert_case(index) method. Thismethod takes one argument for the case index before which the new case will be inserted.
+
+Assigning Case Values
+
+
+Parameter case values can be assigned using the parameters.set_value(index, value) method.
+This method takes two arguments, the index of the case being set, and the valuecorresponding to that index. To assign multiple case values at one time, a for loop can beused. The example script first defines the case values as a list, then loops over them to assignvalues to the mass parameter for all four cases:
+
+1
+2
+3mass_param_values = [0.1, 0.2, 0.5, 1.0]
+for i in range(0,4): 
+mass_param.set_value(i, mass_param_values[i])
+Warning
+
+When referring to cases from the GT Python API, a base-0 index value is always used.
+This differs from the case numbers shown in the GUI, which is base-1. Therefore, theindex value will always be one less than the case value, i.e. to refer to case #2 as shown inthe GUI, index=1 should be used.
+
+Note
+
+Similar to Case Setup in the GT-ISE GUI, if any case values are not defined via the PythonAPI, the previous case value is propagated forward automatically. For example, if themodel had six cases and the mass parameter only had values for cases 1-4 defined, thevalue for case #4 would be propagated to the remaining two cases.
+
+Defining Case Labels
+
+Case labels can be defined via the run_cases.label property. Similar to attributes, specific casescan be referred to by index within the run_cases collection.
+
+1doc.case_setup.run_cases[0].label = 'Mass = [mass]kg'
+Similar to the GUI, formulas and parameters may be used, and labels are automaticallypropagated to all cases unless otherwise defined.
+
+Turning Cases On/Off
+
+Cases can be turned on and off by setting the run_cases.is_on property to True or False.
+Specific cases can be referred to by index within the run_cases collection. The example scriptturns off cases #2 and #3, leaving cases #1 and #4 on to be run.
+
+
+1
+2doc.case_setup.run_cases[1].is_on = False
+doc.case_setup.run_cases[2].is_on = False
+Using Parameters in Attributes
+
+Parameters can be used in object attributes using the standard attribute_values.set_value()
+method. Parameters should be passed in as a string (using ‘quotes’) along with the traditionalsquare bracket [parameter] notation used in GT-SUITE. Since parameter units are definedfrom Case Setup and not at the attribute level, the unit argument may be omitted whenassigning a parameter to an attribute.
+
+1massobj.attribute_values['MASS'].set_value('[mass]')
+Note
+
+In this example, the parameter was first declared in Case Setup, then used in an objectattribute. Similar to the GUI, parameters can also be defined from object attributesdirectly, at which point they will be added to Case Setup automatically, with the unitassociated with the attribute.
+
+
+Docs ≫
+3. Plots and Run Simulation
+
+
+3. Plots and Run Simulation
+
+This example will go through some of the basics of building a model in GT-ISE using the GTPython API and covers the following topics:
+
+Turning plots on/off
+
+
+Setting plot properties
+
+
+Starting a simulation
+
+
+
+
+The files associated with this example can be found in /examples/z_Interfaces_and_Co-
+Simulation_UserCode/GT_Automation_Python_Scripting_API/03-
+Plots_And_Run_Simulation.
+
+Note
+
+The Python script featured in this example is designed to be run from inside the built-inPython editor in GT-ISE. To modify it for running externally to GT-ISE, please see thedocumentation section Getting Started > External API Access > External ScriptInitialization or refer to example 4. External API Access.
+
+Initialization
+
+This section is present at the beginning of each of the example Python scripts. The first lineof the script simply defines the model name that it will operate on: Start_Model.gtm.
+
+1modelname = 'Start_Model.gtm'
+The next line of the script connects the Python interpreter with the GT application withinwhich the script will operate. This instance is saved to the variable app so that it can bereferred to later for other application-level commands. When running this script from thebuilt-in Python editor in GT-ISE, it is necessarily implied that it will operate within the sameinstance of GT-ISE, so all arguments for get_instance() can be omitted (they are ignored ifprovided).
+
+This is followed by an open_document() call to open the starter model defined above. Thismodel resides in the same working directory as the script, so the full absolute path is notneeded. Similar to get_instance(), this is saved to the variable doc so that it can be referred tolater.
+
+
+1
+2app = Application.get_instance()
+doc = app.documents.open_document(modelname)
+Note
+
+In addition to opening models, the open_document() method can also be used to evolvemodels and dependencies from previous versions. By default, opening a model from aprevious version will result in a Python error unless other arguments are specified. Formore information, please see API Documentation > Documents.
+
+Retrieving Parts
+
+To retrieve a part that already exists in a model, the parts.get_part(part_name) method can beused. As in previous examples, it is generally desirable to save/return the part to a variable(masspart and springpart in the below example) so that it can be referenced later.
+
+1
+2masspart = doc.parts.get_part('MassPart')
+springpart = doc.parts.get_part('SpringPart')
+Turning Plots On/Off
+
+Similar to object attributes, part plots can be accessed via the documents.parts.plots collectionby plot short name. Plots can be turned on/off by setting the plots.is_on property to True orFalse.
+
+1springpart.plots['FRCX'].is_on = True
+A for loop can be used to set the is_on property for all plots within a given part. The examplebelow turns on all available plots for the MassPart part:
+
+1
+2for plot in masspart.plots.values(): 
+plot.is_on = True
+Warning
+
+For very large models or ones containing many cases, it is generally recommended thatonly the plots required for a given analysis be turned on, as they do contribute to bothsimulation runtime as well as results file size.
+
+
+Modifying Plot Properties
+
+Plots have additional properties, such as location, sampling type, x-axis type, etc. that can beset via the API. The example below shows how the spring’s Force plot can be set to have asampling type and interval of 0.05 seconds. More information about plot properties can befound in API Documentation > Plots.
+
+1
+2springpart.plots['FRCX'].sampling_type = 'Seconds'
+springpart.plots['FRCX'].sampling_interval = 0.05
+Running a Simulation
+
+Simulations can be started with the GT Python API at the application level using theApplication.simulations.run_simulations() method. This method has one required argument, thedocument for which the simulation will be run, and several keyword arguments that controlsimulation options. The keyword arguments are similar to the options available when runninga GT-SUITE simulation from command line.
+
+The example script passes in the current document object (Start_Model.gtm) along with onekeyword argument, g=on, for turning the Simulation Dashboard GUI on:
+
+1app.simulations.run_simulation(doc, g="on")
+Note
+
+Before starting a simulation, the document must be opened and passed intorun_simulations() as an object.
+
+
+Docs ≫
+4. External API Access
+
+
+4. External API Access
+
+This example is functionally identical to example 1. Build Spring Mass Damper, however ithas been set up for accessing the GT Python API from an external Python installation. Thefollowing topics are covered:
+
+Initializing the script for external API access
+
+
+Using the get_instance() command to connect to an existing gateway, or start a newheadless instance of the gateway.
+
+
+
+
+The files associated with this example can be found in /examples/z_Interfaces_and_Co-
+Simulation_UserCode/GT_Automation_Python_Scripting_API/04-External_API_Access.
+
+For more information on setting up an external Python installation for use with the GTPython API, please see the section Getting Started > External API Access.
+
+Note
+
+The Python script featured in this example can be run both from inside the built-inPython editor in GT-ISE as well as externally.
+
+Initialization
+
+The initialization step of this example script is the only section that differs from the example1. Build Spring Mass Damper, and largely follows the steps described in Getting Started >
+External API Access > External Script Initialization.
+
+The first few lines of the script add a file from the GT-SUITE installation into the Python pathso that the GT Python API library can be imported. GTIHOME is an OS-level environmentvariable corresponding to the GT-SUITE installation location. By retrieving this variable fromthe OS, we can automatically find and set the correct directory for the necessary file,
+independent of where GT-SUITE was installed. After this, the Application module can beimported.
+
+
+1
+2
+3
+4
+5
+6
+7import os
+import sys
+gtihome = os.environ['GTIHOME']
+sys.path.append(os.path.abspath(gtihome + '/v2022/GTsuite/ext/gtsuite.jar'))
+from gtisoft.core.application import Application
+The next line attaches the external Python interpreter to a GT-SUITE application using theApplication.get_instance() method:
+
+1app = Application.get_instance(port=25333, version='-v2022')
+The resulting behavior of this line will differ depending on a few factors:
+
+If the GT-ISE GUI is open and the API gateway is enabled at port:25333 (default), it willconnect to that GUI instance. The remainder of the script will be executed within the GT-
+ISE GUI.
+
+
+If a headless API gateway has already been started from command line at port:25333, itwill connect to that headless instance and execute the remainder of the script.
+
+
+If no API gateway can be found at port:25333, a headless instance will automatically becreated. It will then connect to the new headless instance and execute the remainder ofthe script.
+
+
+
+
+More information about the API gateway and get_instance() arguments can be found inGetting Started > External API Access.
+
+The final two lines of this section save an instance of the units and unit_categories mappings,
+which contain all valid units and unit categories available in GT-SUITE. This step is optional,
+but allows for more convenient access to units later in the script.
+
+1
+2UNITS = app.gtt.units
+UNIT_CATEGORIES = app.gtt.unit_categories
+Note
+
+The built-in Python editor in GT-ISE automatically performs this step before running anyscripts, so it is not necessary for scripts designed to run only inside GT-ISE. However, itmay be helpful to include it for scripts that may also be run externally.
+
+Please refer to example 1. Build Spring Mass Damper for a description of the remainder ofthe example script.
+
+
+Docs ≫
+v2020
+
+
+v2020
+
+Notable changes to the GT-SUITE API and related features are listed below. Please see therelevant sections of the documentation for more detailed information, or contactsupport@gtisoft.com.
+
+RC
+
+Initial release of the GT-SUITE Python API.
+
+Build 1
+
+What’s New:
+
+The GT-SUITE Python API can now be utilized externally to GT-ISE without the GUI openvia a new ‘headless gateway’ option.
+
+
+An option to display Python Developer Info in the GT-ISE GUI was added.
+
+
+The open_document() method can now be used to evolve models and dependencies fromprevious versions.
+
+
+The units argument when using the attribute_values.set_value() method is now optional, asit serves no purpose in certain cases, such as when using a parameter. However, it isstrongly recommended that a unit always be specified when working with numeric values.
+
+
+The Python Script Editor was enabled in the Autolion GUI mode of GT-ISE.
+
+
+
+
+Bugfixes:
+
+Parameters defined directly inside of an attribute using the attribute_values.set_value()
+method were not appearing in Case Setup immediately.
+
+
+Using the create_parameter() method with None specified for the parameter descriptionwas preventing the Value Selector from opening thereafter. None is now converted to anempty string.
+
+
+Specifying a parameter in an attribute with user-definable “dynamic units” was notpropagating the Case Setup units to the attribute until after the model was closed andreopened.
+
+
+The parameters.set_solver_unit() method was incorrectly resetting the display unit to bethe same as the solver unit in Case Setup when used. The display unit will now remainconsistent unless the unit category is changed.
+
+
+The part location coordinates used by the parts.create_part() and parts.get_part() wereusing different conventions (icon center vs. corner), resulting in conflicting values.
+
+
+
+
+
+The document.close() method previously allowed models to be closed despite havingdialog windows open in the GUI, causing those windows to be orphaned. This situationwill now result in a Python error.
+
+
+Python error messages displayed in the Python Script Editor output panel were reportingincorrect line numbers.
+
+
+Python error messages and standard output were both displayed in black text in thePython Script Editor. Error messages are now shown in red text.
+
+
+
+
+Build 2
+
+What’s New:
+
+A setting has been added to File > Options for pointing GT-ISE to other Pythonenvironments. Tools have also been included for creating and managing Python VirtualEnvironments, which can be helpful for installing additional Python packages.
+
+
+Models can now be set up to run an associated Python script each time a simulation islaunched. This Python script is specified via an attribute in the Advanced Setup menu ofany model.
+
+
+The User Shortcuts panel in File > Resources can now be displayed as a toolbar tab, andnow supports Python scripts. Clicking on a Python script in this panel executes itautomatically inside GT-ISE.
+
+
+
+
+Bugfixes:
+
+When using the objects.create_object_copy() method, radio button and checkbox attributevalues were not being copied to the new object.
+
+
+The following methods related to units erroneously included an Application.get_instance()
+call within the API: attribute_values.unit and solver_unit, parameter.unit and solver_unit,
+signal.start_signal_unit and end_signal_unit. This resulted in additional GT-ISE instances tobe spawned when accessing these methods externally to GT-ISE, causing some scripts tofail. Scripts run inside the GT-ISE GUI were unaffected.
+
+
+Setting plots.sampling_interval = ‘def’ was not resulting in any change to the attribute. Both‘def’ and None are now accepted.
+
+
+
+
+Build 3
+
+What’s New:
+
+The GTPythonExternal license is no longer required to access the GT Python API fromoutside the GT GUI applications. All usage of the GT Python API is now unified under theGTAutomation license for v2020 build 3, and v2021 build 1 and onward.
+
+
+When working with parts via the GT Python API, the location_x and location_y propertiesnow refer to the center of the part icon instead of the upper-left corner. This waschanged to make part placement more consistent, independent of the part’s icon size.
+
+
+
+
+
+Bugfixes:
+
+Stability of GTAutomation license checkout has been improved, particularly whenconnecting to a license server over a network with high latency (such as over a VPNconnection).
+
+
+Opening the File > Options menu sometimes resulted in an unanticipated error due tosettings for Python Virtual Environments.
+
+
+
+
+
+Docs ≫
+v2021
+
+
+v2021
+
+Notable changes to the GT-SUITE API and related features are listed below. Please see therelevant sections of the documentation for more detailed information, or contactsupport@gtisoft.com.
+
+RC
+
+What’s New:
+
+The GT-SUITE Python API has been extended to GT-POST, where it can be used to queryinstantaneous plots and RLTs, extract result data, and create custom report (.gu) files.
+
+
+Models can now be set up to run an associated Python script after each time thesimulation runs. This Python script is specified via an attribute in the Run Setup menu ofany model. The attribute for running a Python script before the simulation has also beenmoved to the Run Setup menu.
+
+
+The GT-SUITE Python API documentation is now available in the/documents/Graphical_Applications/GT-Automation_Python_API folder of the GT-
+SUITE installation for access outside of the built-in Python editor.
+
+
+Properties for controlling the icon, size, and orientation of parts on the GT-ISE map havebeen added. These properties can also be set when using the create_part() method.
+
+
+Methods have been added for the following actions in GT-ISE:
+
+Querying and deleting unused objects/templates from a model
+
+
+Changing a document’s license type
+
+
+Creating a new blank document (.gtm, .gtsub, etc.)
+
+
+Querying the version of an application instance or a document
+
+
+GT-POWER-xRT Advisor
+
+
+
+
+
+
+
+Bugfixes:
+
+Models with the Design Optimizer turned on can now be run as a distributed simulationvia the Python API. This previously resulted in running the simulation locally as a serialrun.
+
+
+
+
+Build 1
+
+What’s New:
+
+
+Explicit plots and datasets can now be created from scratch inside report (.gu) files via theGT Python API.
+
+
+Result files with the .gdx file extension can now be opened via thedocuments.open_document() method. Doing so will automatically create a converted copyof the result file in the new .glx file format.
+
+
+The GTPythonExternal license is no longer required to access the GT Python API fromoutside the GT GUI applications. All usage of the GT Python API is now unified under theGTAutomation license for v2020 build 3, and v2021 build 1 and onward.
+
+
+The current working directory of the Python script now gets passed into the GT PythonAPI, allowing relative paths to be used when working with GT model files.
+
+
+A force flag has been added to the document_tools.delete_unused_objects() method fordeleting objects that can be used without any dependency.
+
+
+
+
+Bugfixes:
+
+The attribute_values.get_value() method was always returning an error when used in a“setup” object, i.e. run_setup, output_setup, advanced_setup, and design_optimizer.
+
+
+In some cases, while accessing the GT Python API externally, closing a document via thedocuments.close() method was resulting in an error.
+
+
+When running inside the built-in Python Script Editor, certain types of Python errorscaused an incorrect line number to be shown in the error message.
+
+
+For attributes where both the solver and display unit can be user-defined (such as in datareference objects), certain combinations of the set_value() and set_solver_unit() methodswere causing the unit to be reset to ‘No Unit’.
+
+
+The multiplier property of units inside the gtt.units module was erroneously returning theunit ID number instead.
+
+
+Handling of parts inside internal subassemblies when using thedocument_tools.combine_flow_volume_to_*() methods has been improved.
+
+
+
+
+Build 2
+
+Bugfixes:
+
+Launching a headless API gateway for GT-POST via command line was incorrectlychecking out a GUI license in addition to the GT-Automation license. The headless APIgateway for GT-ISE was not affected.
+
+
+In certain situations, using the combine_flow_volume_to_*() methods was causing GUIdialogs to show, prompting the user for confirmation. These dialogs are now suppressed.
+
+
+The entity filtering methods in GT-POST have been improved to better handle plot groupnames that do not fall under the standard Template:Part format.
+
+
+
+
+Build 3
+
+What’s New
+
+
+Units for GT-POST results are now more accessible via dedicated properties and methodsin the plot/dataset classes for retrieving and setting units.
+
+
+
+
+
+Docs ≫
+v2022
+
+
+v2022
+
+Notable changes to the GT-SUITE API and related features are listed below. Please see therelevant sections of the documentation for more detailed information, or contactsupport@gtisoft.com.
+
+RC
+
+What’s New:
+
+The built-in Python editor now has an auto-indent feature to match indentation ofprevious lines, or add indentation after certain lines like if statements, for loops, etc. Aspart of this feature, the editor can also detect whether tabs or spaces have been used andconvert between them if needed.
+
+
+The API documentation tab in the built-in Python editor now has a find (ctrl-f) feature fortext search.
+
+
+New methods have been added to the plot and dataset classes in GT-POST for queryingand setting units.
+
+
+When data is printed using the data.formatted method for datasets in GT-POST, units arenow included in the column headers for reference.
+
+
+
+
+Bugfixes:
+
+Deleting parts via Python script would occasionally cause unanticipated errors to occurinside of GT-ISE.
+
+
+When executing a Python script for the first time for a given application instance, if alicense could not be checked out successfully, all subsequent attemps would also fail tocheck out a license even if one became available.
+
+
+Attempting to launch a headless instance of GT-POST (without GUI) and open a result(.glx) file was incorrectly leading to a “No valid license” error, even if a license wasavailable.
+
+
+Launching a simulation with the Simulation Dashboard GUI turned off (g=’off’) andsimulation monitors turned on (m=’on’) was leading to a startup delay due to this being anincompatible combination. Monitors will now automatically be turned off by default if theSimulation Dashboard is turned off.
+
+
+
+
+Build 1
+
+What’s New:
+
+
+The GT-SUITE Python API is now available in GEM3D/COOL3D for editing Case Setupand object attributes.
+
+
+A new function has been added to the document tools module for automating updates ofthe ProfileGPSRoute reference object for GT-RealDrive.
+
+
+Process Map (.gtprocess) files can now be opened and edited via the Python API.
+
+
+
+
+Bugfixes:
+
+When changing the port of an existing signal link via Python script, the signal was notupdating with the port, causing unit conflicts in some situations.
+
+
+Templates that only allow ‘def’ objects could not be used via Python unless the ‘def’object was already present in the model.
+
+
+Printing documents would sometimes return an empty list when called from an externalPython interpreter. This could also result in a keyerror due to object library (.gto) files notbeing supported via the API.
+
+
+
+
+Build 2
+
+Bugfixes:
+
+The “Stop” button in the built-in Python editor for halting a running script was notworking.
+
+
+New, unsaved documents were not appearing in the Application.documents list until afterthey were saved to disk.
+
+
+Existing report (*.gu) files could not be opened in GT-POST via the Python API due to anIndexOutOfBoundsException error.
+
+
+Creating new groups and separators within a report (*.gu) file via the Python API wascausing GT-POST to freeze.
+
+
+
+
+Build 3
+
+Bugfixes:
+
+The parts.create_part_copy() was not functioning and would always result in an error.
+
+
+Default ‘def’ library objects could not be used via the Python API unless the TemplateLibrary was open in the GT-ISE GUI.
+
