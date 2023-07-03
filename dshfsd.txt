@@ -1,0 +1,564 @@
+Option Explicit
+
+
+Sub GetFilePathOfCATIAModel(strFileName, CATIAModelPath)
+
+Dim CATIAModelName
+
+strFileName = CATIA.FileSelectionBox("FileSelect", "*.CATPart", CatFileSelectionModeOpen)  'CATIAのフルパスを取得
+
+CATIAModelName = Dir(strFileName) 'CATIAモデル名取得
+
+CATIAModelPath = Replace(strFileName, ("\" & CATIAModelName), "") 'CATIAモデルパス取得
+
+
+
+End Sub
+
+Function CreateTempFilePath(OriginalFilePath)
+    Dim FSO, TempFolder, TempFileName, TempFilePath
+
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    Set TempFolder = FSO.GetSpecialFolder(2) ' TemporaryFolder
+
+    TempFileName = FSO.GetTempName()
+    TempFilePath = TempFolder.Path & "\" & TempFileName & ".CATPart"
+
+    FSO.CopyFile OriginalFilePath, TempFilePath
+
+    CreateTempFilePath = TempFilePath
+End Function
+
+Function ExtractBodyNames(Bodies)
+    Dim i, Body, BodyNames
+    Set BodyNames = CreateObject("System.Collections.ArrayList")
+    For i = 1 To Bodies.Count
+        Set Body = Bodies.Item(i)
+        BodyNames.Add Body.Name
+    Next
+    Set ExtractBodyNames = BodyNames
+End Function
+
+Function ExtractSolidNames(Bodies)
+    Dim i, j, Body, Shapes, Shape, SolidNames
+    Set SolidNames = CreateObject("System.Collections.ArrayList")
+    For i = 1 To Bodies.Count
+        Set Body = Bodies.Item(i)
+        Set Shapes = Body.Shapes
+        For j = 1 To Shapes.Count
+            Set Shape = Shapes.Item(j)
+            If TypeName(Shape) = "Solid" Then
+                SolidNames.Add Shape.Name
+            End If
+        Next
+    Next
+    Set ExtractSolidNames = SolidNames
+End Function
+
+Function GetSolidNameByBodyName(BodyName, SolidNames)
+    Dim SolidName
+    For Each SolidName In SolidNames
+        If InStr(SolidName, BodyName) > 0 Then
+            GetSolidNameByBodyName = SolidName
+            Exit Function
+        End If
+    Next
+    GetSolidNameByBodyName = ""
+End Function
+
+Sub HideAllBodies(partDocument1, part1, bodies1)
+    Dim Body, Selection1, visPropertySet1, i
+
+    Set Selection1 = partDocument1.Selection
+    Set visPropertySet1 = Selection1.VisProperties
+
+    For i = 1 To bodies1.Count
+        Set Body = bodies1.Item(i)
+        part1.InWorkObject = Body
+
+        Selection1.Add Body ' Remove parentheses here
+        visPropertySet1.SetShow 1
+    Next
+End Sub
+
+'離散化
+Sub ProcessBodyAndSolid(part1, partDocument1, BodyName, SolidName)
+    Dim hybridBodies1, hybridBody1, hybridShapeFactory1, bodies1, body1, shapes1, solid1, FaceIndex, reference1, HybridShapeExtractMulti, Selection1, hybridShapes1, ShapeToRemove, HybridShapeExtract1
+  
+
+    Dim FaceIndex_F, FaceIndex_B
+
+    Dim ECount, ECount_2, NotECount, i, j
+    
+    
+    ECount = 0
+    ECount_2 = 0
+    NotECount = 0
+
+    Set hybridBodies1 = part1.HybridBodies
+    Set hybridBody1 = hybridBodies1.Add()
+    hybridBody1.Name = BodyName
+
+    part1.Update
+
+    Set hybridShapeFactory1 = part1.HybridShapeFactory
+    Set bodies1 = part1.Bodies
+    Set body1 = bodies1.Item(BodyName)
+    Set shapes1 = body1.Shapes
+    Set solid1 = shapes1.Item(SolidName)
+    
+  
+    FaceIndex = 1
+
+    FaceIndex_F = 1
+    FaceIndex_B = 1
+
+    On Error Resume Next
+    
+    
+    'MultipleExtract
+    Do
+        Set reference1 = part1.CreateReferenceFromBRepName("RSur:(Face:(Brp:(" & SolidName & ";%" & FaceIndex & ");None:();Cf14:());WithPermanentBody;WithoutBuildError;WithSelectingFeatureSupport;MFBRepVersion_CXR29)", solid1)
+               
+        Set HybridShapeExtractMulti = hybridShapeFactory1.AddNewExtractMulti(reference1)
+        HybridShapeExtractMulti.AddConstraintTolerant reference1, 3, False, False, 0.005, 0.5, 0.98, 1
+        HybridShapeExtractMulti.SetElement 1, reference1
+        HybridShapeExtractMulti.SetPropagationType 1, 3
+        HybridShapeExtractMulti.SetComplementaryExtractMulti 1, False
+        HybridShapeExtractMulti.SetIsFederated 1, False
+        HybridShapeExtractMulti.SetDistanceThresholdActivity 1, False
+        HybridShapeExtractMulti.SetAngularThresholdActivity 1, False
+        HybridShapeExtractMulti.SetCurvatureThresholdActivity 1, False
+
+
+        '要素表示
+        hybridBody1.AppendHybridShape HybridShapeExtractMulti
+
+        part1.InWorkObject = HybridShapeExtractMulti
+        part1.Update
+
+       
+        If Err.Number <> 0 Then
+        
+            Set Selection1 = partDocument1.Selection
+            Selection1.Clear
+
+            Set hybridShapes1 = hybridBody1.HybridShapes
+            Set ShapeToRemove = hybridShapes1.Item(hybridShapes1.Count)
+
+            Selection1.Add ShapeToRemove
+            Selection1.Delete
+            
+                
+               Do Until FaceIndex_F = 1
+               
+                     Err.Number = 0
+                  
+                      Set reference1 = part1.CreateReferenceFromBRepName("RSur:(Face:(Brp:(" & SolidName & ";%" & FaceIndex & ");AtLeastOneNoSharedIncluded:(Brp:(" & SolidName & ";%" & FaceIndex_F & ");Brp:(" & SolidName & ";%" & FaceIndex_B & "));Cf14:());WithPermanentBody;WithoutBuildError;WithSelectingFeatureSupport;MFBRepVersion_CXR29)", solid1)
+                      Set reference1 = part1.CreateReferenceFromBRepName("RSur:(Face:(Brp:(" & SolidName & ";%" & FaceIndex & ");AtLeastOneNoSharedIncluded:(Brp:(" & SolidName & ";%" & FaceIndex_F & "));Cf14:());WithPermanentBody;WithoutBuildError;WithSelectingFeatureSupport;MFBRepVersion_CXR29)", solid1)
+
+
+                      Set HybridShapeExtractMulti = hybridShapeFactory1.AddNewExtractMulti(reference1)
+                      HybridShapeExtractMulti.AddConstraintTolerant reference1, 3, False, False, 0.005, 0.5, 0.98, 1
+                      HybridShapeExtractMulti.SetElement 1, reference1
+                      HybridShapeExtractMulti.SetPropagationType 1, 3
+                      HybridShapeExtractMulti.SetComplementaryExtractMulti 1, False
+                      HybridShapeExtractMulti.SetIsFederated 1, False
+                      HybridShapeExtractMulti.SetDistanceThresholdActivity 1, False
+                      HybridShapeExtractMulti.SetAngularThresholdActivity 1, False
+                      HybridShapeExtractMulti.SetCurvatureThresholdActivity 1, False
+
+
+                      '要素表示
+                      hybridBody1.AppendHybridShape HybridShapeExtractMulti
+
+                      part1.InWorkObject = HybridShapeExtractMulti
+                      part1.Update
+
+                          If Err.Number <> 0 Then
+    
+    
+                              Set Selection1 = partDocument1.Selection
+                              Selection1.Clear
+    
+                              Set hybridShapes1 = hybridBody1.HybridShapes
+                              Set ShapeToRemove = hybridShapes1.Item(hybridShapes1.Count)
+    
+                              Selection1.Add ShapeToRemove
+                              Selection1.Delete
+    
+                          End If
+                      
+                      FaceIndex_F = FaceIndex_F + 1
+                      
+                   Loop
+                 
+                    FaceIndex_F = 0
+        
+                    
+                    Err.Number = 0
+                    
+                    ECount = ECount + 1
+                    
+                        If ECount = 10 Then
+                        
+                             Exit Do
+                        
+                        End If
+                
+        End If
+        
+        FaceIndex = FaceIndex + 1
+        
+    Loop
+    On Error GoTo 0
+End Sub
+
+
+'CATIAモデルの保存場所にSTLフォルダを作成
+Sub MakeSTLFolder(CATIAModelPath)
+
+Dim objFso As Object
+Set objFso = CreateObject("Scripting.FileSystemObject")
+
+
+If objFso.FolderExists(CATIAModelPath & "\STL") Then
+   
+Else
+    
+    MkDir CATIAModelPath & "\STL"
+    
+End If
+
+Set objFso = Nothing
+    
+End Sub
+
+'パイプ名のフォルダ作成
+Sub MakeFolder(part1, partDocument1, BodyName, SolidName, STLDirectory)
+
+Dim FSO As Object
+Dim myFolders As Object
+
+Dim bodies1, body1
+
+Set bodies1 = part1.Bodies
+Set body1 = bodies1.Item(BodyName)
+
+
+Set FSO = CreateObject("Scripting.FileSystemObject") 'インスタンス化
+Set myFolders = FSO.GetFolder(STLDirectory).SubFolders
+
+
+myFolders.Add body1.Name    'パイプごとにフォルダー作成
+
+Set myFolders = Nothing
+    
+End Sub
+
+
+Sub ShowHideAndProcessGS(partDocument1, STLDirectory)
+    Dim part1
+    Set part1 = partDocument1.Part
+    Dim hybridBodies1
+    Set hybridBodies1 = part1.HybridBodies
+    
+    Dim i, hybridBody1, GSName, Selection1, visPropertySet1, j, OtherHybridBody, PreviousHybridBody
+    For i = 1 To hybridBodies1.Count
+        Set hybridBody1 = hybridBodies1.Item(i)
+        GSName = hybridBody1.Name
+        
+        Set Selection1 = partDocument1.Selection
+        Selection1.Clear
+        Selection1.Add hybridBody1
+        
+        Set visPropertySet1 = Selection1.VisProperties
+        
+        If i = 1 Then
+            ' Show the first GS
+            visPropertySet1.SetShow 0
+            
+            ' Hide all other GSs
+            For j = 2 To hybridBodies1.Count
+                Set OtherHybridBody = hybridBodies1.Item(j)
+                Selection1.Clear
+                Selection1.Add OtherHybridBody
+                visPropertySet1.SetShow 1
+            Next
+        Else
+            ' Hide previous GS
+            Set PreviousHybridBody = hybridBodies1.Item(i - 1)
+            Selection1.Clear
+            Selection1.Add PreviousHybridBody
+            visPropertySet1.SetShow 1
+            
+            ' Show current GS
+            Selection1.Clear
+            Selection1.Add hybridBody1
+            visPropertySet1.SetShow 0
+        End If
+        
+        ' Process current GS
+        ProcessAllMEAndSaveSTL partDocument1, GSName, STLDirectory
+        
+        Selection1.Clear
+    Next
+End Sub
+
+
+
+'1エレメントずつSTL化
+
+Sub ProcessAllMEAndSaveSTL(partDocument1, GSName, STLDirectory)
+    Dim part1, hybridBodies1, hybridBody1, hybridShapes1, Selection1, MEIndex, HybridShape1, visPropertySet1, CATIA, STLFileName, STLFilePath, i, j
+
+    Set part1 = partDocument1.Part
+    Set hybridBodies1 = part1.HybridBodies
+    Set hybridBody1 = hybridBodies1.Item(GSName)
+
+    Set hybridShapes1 = hybridBody1.HybridShapes
+    
+
+    ' Process all MEs in the list
+   
+    For MEIndex = 1 To hybridShapes1.Count
+        For i = 1 To hybridShapes1.Count
+        
+            Set HybridShape1 = hybridShapes1.Item(i)
+
+            Set Selection1 = partDocument1.Selection
+            Selection1.Clear
+            Selection1.Add HybridShape1
+
+            Set visPropertySet1 = Selection1.VisProperties
+
+            If i = MEIndex Then
+                ' Show the current ME
+                visPropertySet1.SetShow 0
+            ElseIf MEIndex = 1 Or (MEIndex <> 1 And i = MEIndex - 1) Then
+                ' Hide all other MEs for the first ME, and hide the previous ME for the 2nd ME and beyond
+                visPropertySet1.SetShow 1
+            Else
+                ' No operation on other MEs
+            End If
+
+            Selection1.Clear
+        
+           
+        Next
+        
+                 ' Save as STL with the specified name
+                STLFileName = GSName & "_" & MEIndex & ".stl"
+                STLFilePath = STLDirectory & "\" & GSName & "\" & STLFileName '
+
+                ' Export STL file
+                Set CATIA = CreateObject("CATIA.Application")
+                CATIA.DisplayFileAlerts = False
+                CATIA.ActiveDocument.ExportData STLFilePath, "stl"
+                CATIA.DisplayFileAlerts = True
+                            
+      Next
+End Sub
+
+Sub ShowAllElements()
+
+Dim i, j
+
+Dim part1 As Part
+Set part1 = CATIA.ActiveDocument.Part
+
+Dim hybridBodies1 As HybridBodies
+Set hybridBodies1 = part1.HybridBodies
+
+Dim hybridShapes1 As HybridShapes
+Dim HybridShape1 As HybridShape
+
+Dim bodies1 As Bodies
+Set bodies1 = part1.Bodies
+
+Dim shapes1 As Shapes
+Dim Shape1 As Shape
+
+
+ 'セレクション取得
+    Dim Selection1 As Selection
+    Set Selection1 = CATIA.ActiveDocument.Selection
+
+
+'Show/Hide プロパティ変数宣言
+    Dim visPropertySet1 As VisPropertySet
+    Set visPropertySet1 = Selection1.VisProperties
+    
+    
+'Select All GS & ME
+For i = 1 To hybridBodies1.Count
+    
+    'GS 取得
+    Set hybridShapes1 = hybridBodies1.Item(i).HybridShapes
+    
+    'Select GS
+    Selection1.Add hybridShapes1
+    
+     For j = 1 To hybridShapes1.Count
+     
+        'Surfaceを取得
+        Set HybridShape1 = hybridShapes1.Item(j)
+    
+         
+        'Select ME
+        Selection1.Add HybridShape1
+        
+     Next
+Next
+            
+       
+'Select All Body & Solid
+For i = 1 To bodies1.Count
+        
+     Set shapes1 = bodies1.Item(i).Shapes
+     
+     'Select Body
+     Selection1.Add shapes1
+     
+     For j = 1 To shapes1.Count
+     
+         Set Shape1 = shapes1.Item(j)
+        
+         'Select Solid
+         Selection1.Add Shape1
+    Next
+ Next
+ 
+                        
+'Show All Elments
+Set visPropertySet1 = Selection1.VisProperties
+        
+visPropertySet1.SetShow 0
+
+Selection1.Clear
+
+End Sub
+
+
+
+Sub CATMain()
+
+    Dim StartTime, EndTime, ProcessTime
+
+    StartTime = Timer
+    
+
+'    Public Const STLDirectory = function(strFileName)
+'    Public Const UserDefinedFilePath = function(CATIAModelPath)
+
+    Dim hybridBody1, hybridShapeFactory1, body1, shapes1, solid1
+    Dim FaceIndex, Reference, HybridShapeExtractMulti, Selection1, visPropertySet1
+    Dim HybridShapes, ShapeToRemove
+    Dim HybridShape1, MEIndex, i, STLFileName, STLFilePath
+    Dim OriginalFilePath, TempFilePath, OriginalDirectoryName
+    Dim CATIA, partDocument1, part1, hybridBodies1, bodies1, partDocument
+    Dim BodyNames, SolidNames, BodyName, SolidName
+    Dim strFileName, CATIAModelPath, STLDirectory
+    
+    
+    'CATIAモデル選択してパスの情報取得
+    Call GetFilePathOfCATIAModel(strFileName, CATIAModelPath)
+    
+  
+    OriginalFilePath = strFileName
+    
+    STLDirectory = CATIAModelPath & "\STL"
+
+
+    If OriginalFilePath = "" Then
+        MsgBox "No file selected. Exiting."
+        Exit Sub
+    End If
+
+    TempFilePath = CreateTempFilePath(OriginalFilePath)
+
+    Set CATIA = CreateObject("CATIA.Application")
+    CATIA.RefreshDisplay = False
+    CATIA.Documents.Open TempFilePath
+
+    Set partDocument1 = CATIA.ActiveDocument
+    Set part1 = partDocument1.Part
+    Set hybridBodies1 = part1.HybridBodies
+    Set bodies1 = part1.Bodies
+    
+    'STLフォルダ作成
+    Call MakeSTLFolder(CATIAModelPath)
+
+
+    ' Extract all Body and Solid names
+    Set BodyNames = ExtractBodyNames(bodies1)
+    Set SolidNames = ExtractSolidNames(bodies1)
+
+
+    ' Process all Body and Solid names
+    For i = 0 To BodyNames.Count - 1
+            Call ProcessBodyAndSolid(part1, partDocument1, BodyNames(i), SolidNames(i))
+            Call MakeFolder(part1, partDocument1, BodyNames(i), SolidNames(i), STLDirectory)
+    Next
+
+    ' Hide all bodies
+    Call HideAllBodies(partDocument1, part1, bodies1)
+
+
+    ' Show, hide and process all GSs
+    Call ShowHideAndProcessGS(partDocument1, STLDirectory)
+    
+    
+    ' Show all Elements
+    Call ShowAllElements
+    
+
+    ' Save the modified model with a new name
+    Dim OriginalFileNameWithoutExtension, NewFileName, NewFilePath
+    OriginalFileNameWithoutExtension = Left(OriginalFilePath, InStrRev(OriginalFilePath, ".") - 1)
+    NewFileName = OriginalFileNameWithoutExtension & "_d1.CATPart"
+    NewFilePath = OriginalDirectoryName & "" & NewFileName
+    partDocument1.SaveAs NewFilePath
+
+    ' Close and delete the temporary file
+    partDocument1.Close
+
+    'MsgBox "Process completed."
+
+    ' Refresh display
+    CATIA.RefreshDisplay = True
+
+
+
+    EndTime = Timer
+
+    ProcessTime = EndTime - StartTime
+
+    MsgBox "処理時間：" & ProcessTime
+
+    
+    
+End Sub
+
+
+
+ ' Add the following lines to display BodyNames and SolidNames
+   ' Dim BodyNamesMsg, SolidNamesMsg
+
+   ' BodyNamesMsg = "BodyNames:" & vbCrLf
+   ' For Each BodyName In BodyNames
+       ' BodyNamesMsg = BodyNamesMsg & BodyName & vbCrLf
+   ' Next
+   ' MsgBox BodyNamesMsg
+
+   ' SolidNamesMsg = "SolidNames:" & vbCrLf
+   ' For Each SolidName In SolidNames
+      ' SolidNamesMsg = SolidNamesMsg & SolidName & vbCrLf
+   ' Next
+   ' MsgBox SolidNamesMsg
+
+
+
+Sub VBAProject1()
+End Sub
+
